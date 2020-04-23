@@ -1,0 +1,93 @@
+{
+  "app": {
+    "name": "SDWMap",
+    "company": "Alphanumeric"
+  },
+
+  "forms": {
+    "titles": {
+      "login": "Log In"
+    },
+    "rules": {
+      "invalidUsername": "This username is not valid",
+      "requiredField": "This is a required field",
+      "passwordField": "The password you entered is not valid",
+      "passwordMatch": "The two passwords do not match",
+      "maximunLength": "Must be at most {length} characters long",
+      "minimunLength": "Must be at least {length} characters long",
+      "usernameInUse": "This username is already in use, please choose a different one.",
+      "namedRequiredField": "{name} is a required field",
+      "mustBeUser": "Please enter a valid list of Users",
+      "mustBeURL": "Please enter a valid URL",
+      "mustBeCountry": "Please enter a valid Country"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid credentials, please verify your username and password."
+    },
+    "toasts": {
+      "permissionError": "There was an error while accessing the resource, you might not have permission to view this.",
+      "uploadError": "There was an error uploading your file",
+      "loggedOut": "You have been logged out",
+      "resetPasswordSubmitted": "A password reset email has been submitted to the user of this account.",
+      "saveSuccess": "Saved successfully!",
+      "saveFailure": "Failed to save, try again later",
+      "saveImageSuccess": "Image uploaded successfully!",
+      "saveImageFailure": "Failed to upload image.",
+      "projectSaveSuccess": "Project data updated!",
+      "projectSaveFailure": "Failed to save the Project, please try again later",
+      "structureSaveSuccess": "Structure data updated!",
+      "structureSaveFailure": "Failed to save the Structure, please try again later",
+      "participantsSuccess": "Saved people involved in the project"
+    },
+    "fields": {
+      "name": "Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "summary": "Summary",
+      "description": "Description",
+      "socialNetwork": "Social Network",
+      "contactEmail": "Contact Email",
+      "contactWebsite": "External Website",
+      "postalAddress": "Postal Address",
+      "username": "Username",
+      "usernameOrEmail": "Username or Email",
+      "password": "Password",
+      "passwordRepeat": "Repeat your password",
+      "title": "Title",
+      "coverImage": "Cover Image"
+    },
+    "labels": {
+      "searchUsers": "Search Users"
+    },
+    "hints": {
+      "contactEmail": "Where should people reach you with questions about the project?",
+      "contactWebsite": "URL to an external site where people can see more about your project.",
+
+      "username": "Enter your login user name. A good choice is firstname.lastname (i.e. john.doe)",
+
+      "postalAddress": "If someone sent you a letter, where would it be addressed?",
+      "knowledgeArea": "UNESCO Knowledge Area that best defines your project.",
+      "knowledgeAreas": "Select all knowledge areas of research under this structure.",
+      "summary": "Long-form project description. No character limit.",
+      "description": "Long-form description. No character limit. Markdown is available for styling",
+      "descriptionTemplate": "Please follow the prodived template and do not remove the section headers (Lines starting with '##'). Fill in your project specifics replacing the instructional lines.",
+      "password": "Your password must be at least 8 characters, not be a common password and not contain your username."
+    }
+  },
+
+  "$vuetify": {
+    "dataIterator": {
+      "rowsPerPageText": "Items per page:",
+      "rowsPerPageAll": "All",
+      "pageText": "{0}-{1} of {2}",
+      "noResultsText": "No matching records found",
+      "nextPage": "Next page",
+      "prevPage": "Previous page"
+    },
+    "dataTable": {
+      "rowsPerPageText": "Rows per page:"
+    },
+    "noDataText": "No data available"
+  }
+}
