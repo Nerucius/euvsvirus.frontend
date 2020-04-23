@@ -83,7 +83,7 @@ export default {
 
       // TODO: test this
       // this.map.locate({setView: true, zoom:13});
-      this.map.locate({setView: true, watch: true}) /* This will return map so you can do chaining */
+      this.map.locate({setView: true, maxZoom:13, watch: true}) /* This will return map so you can do chaining */
         .on('locationfound', function(e){
             var marker = L.marker([e.latitude, e.longitude]).bindPopup('Your are here :)');
             var circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
@@ -92,8 +92,8 @@ export default {
                 fillColor: '#cacaca',
                 fillOpacity: 0.2
             });
-            map.addLayer(marker);
-            map.addLayer(circle);
+            this.map.addLayer(marker);
+            this.map.addLayer(circle);
         })
        .on('locationerror', function(e){
             console.log(e);
