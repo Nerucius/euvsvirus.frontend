@@ -82,7 +82,23 @@ export default {
       Stamen_TonerLabels.addTo(this.map);
 
       // TODO: test this
-      this.map.locate({setView: true});
+      // this.map.locate({setView: true, zoom:13});
+      this.map.locate({setView: true, watch: true}) /* This will return map so you can do chaining */
+        .on('locationfound', function(e){
+            var marker = L.marker([e.latitude, e.longitude]).bindPopup('Your are here :)');
+            var circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+                weight: 1,
+                color: 'blue',
+                fillColor: '#cacaca',
+                fillOpacity: 0.2
+            });
+            map.addLayer(marker);
+            map.addLayer(circle);
+        })
+       .on('locationerror', function(e){
+            console.log(e);
+            alert("Location access denied.");
+        });
     },
 
     async search(event) {
