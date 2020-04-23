@@ -1,11 +1,10 @@
-# MerCoVid - Social Network for Local Shops
+# Social Distance Workouts - Find places to workout away from people
 
-MerCoVid is a social network for small and medium local shops that want to promote
-themselves in a digital space open to everyone. Powered by Web technologies that open
-the access to everyone.
+This app's idea looks towards a bittersweet future where we might still need to distnce ourselves from other people during our free time. And that includes when we work out. Imagine going out for a jog and having to come into close contact with other people who had the same idea, and unfortunately went to the same nice park at the same time as you. If only you could have known!
 
-![Image](https://cloud.carrotpiracy.com/index.php/s/HQrK4CRWkqpwWYw/download)
+This is where SDW comes into play. Be able to take a quick glance of your city and know exactly where people are planning to go cycling, jogging, swimming. And avoid those areas! Want to contribute to the platform and mark an area where you're going to be minding your business? You can do that aswell. Bonus points, people will also avoid you now that they know wherein you plan to workout. Everyone wins.
 
+Follow our development closely, we plan to participate in the EUvsVirus hackathon.
 
 ## Architecture Overview
 
