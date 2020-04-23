@@ -4,6 +4,47 @@
     "company": "Alphanumeric"
   },
 
+  "actions": {
+    "add": "Add",
+    "accept": "Accept",
+    "submit": "Submit",
+    "approve": "Approve",
+    "validate": "Validate",
+    "create": "Create",
+    "read": "Read",
+    "delete": "Delete",
+    "update": "Update",
+    "updateResponse": "Update response",
+    "withdraw": "Withdraw",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "save": "Save",
+    "loading": "Loading",
+    "close": "Close",
+    "cancel": "Cancel",
+    "more": "More",
+    "next": "Next",
+    "manage": "Manage",
+    "clearFilter": "Clear filter",
+    "moreInformation": "More Information",
+    "manageName": "Manage this {name}",
+    "viewPublicPage": "View public page",
+    "exportAllData": "Export all data",
+    "download": "Download",
+    "downloadName": "Download {name}"
+  },
+  "states": {
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "current": "Current",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "noums": {
+    "user": "User"
+  },
+
   "forms": {
     "titles": {
       "login": "Log In"

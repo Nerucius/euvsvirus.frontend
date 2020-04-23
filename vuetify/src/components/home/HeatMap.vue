@@ -30,17 +30,21 @@
         </v-toolbar>
 
     <!-- Map -->
-    <div id="heatmap">
-      Your browser does not support Javascript Maps.
-    </div>
+    <div id="heatmap" />
   </v-card>
 </template>
 
 <script>
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
+import {Stamen_Watercolor, Stamen_TonerLabels} from '@/plugins/maplayers.js'
+
+const provider = new OpenStreetMapProvider();
+
 export default {
   data() {
     return {
       map: null,
+      searchMarker: null,
       searchTerm: ""
     };
   },
@@ -57,8 +61,11 @@ export default {
 
   methods: {
     initMap() {
-      let mapUrlWatercolor =
-        "https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg";
+      // let mapUrlWatercolor =
+      //   "https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg";
+      // let mapUrlTerrain =
+      //   "http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg";
+
       this.map = L.map("heatmap", {
         maxBounds: [
           [80, -180],
@@ -70,16 +77,32 @@ export default {
         maxZoom: 15,
         center: { lat: 41.3805702, lon: 2.1537778 } // Barcelona
       });
-      L.tileLayer(mapUrlWatercolor, {
-        attribution: `
-            <small>&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
-            | &copy; <a href="http://maps.stamen.com">Stamen Design</a></small>`
-      }).addTo(this.map);
+
+      Stamen_Watercolor.addTo(this.map);
+      Stamen_TonerLabels.addTo(this.map);
+
+      // TODO: test this
       this.map.locate({setView: true});
     },
 
-    search(event) {
-      console.log(event);
+    async search(event) {
+      if(!this.searchTerm){ return }
+
+      // Call search api
+      let results = await provider.search({ query: this.searchTerm });
+      if(results.length == 0){
+        this.$store.dispatch('toast/error', {message: "No address or city found."})
+      }
+      let target = results[0]
+
+      // Clear previous Marker
+      if(this.searchMarker){ this.map.removeLayer(this.searchMarker) }
+      // Create marker at lat lon and center map
+      this.searchMarker = L.marker([target.y, target.x])
+        .addTo(this.map)
+        .bindPopup(target.label)
+        .openPopup()
+      this.map.flyTo([target.y, target.x], 13)
     },
 
     geolocate(){
