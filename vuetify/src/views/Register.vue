@@ -7,9 +7,9 @@ td {
 
 
 <template>
-  <v-layout align-content-start row wrap>
-    <v-flex xs12>
-      <v-card elevation="0">
+  <v-layout justify-center row>
+    <v-flex xs12 md10 lg8 xl6>
+      <v-card flat>
         <v-card-title>
           <h2>{{ $t('pages.login.register') }}</h2>
         </v-card-title>

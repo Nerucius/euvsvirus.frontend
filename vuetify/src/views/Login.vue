@@ -1,6 +1,6 @@
 <template>
-  <v-layout row justify-center>
-    <v-flex mt-3 xs12 md10 lg8 xl6>
+  <v-layout justify-center row>
+    <v-flex xs12 md10 lg8 xl6>
       <v-card flat>
         <!-- <v-toolbar dense flat dark color="primary">
           <v-toolbar-title>{{ $t('forms.titles.login') }}</v-toolbar-title>
@@ -23,6 +23,15 @@
         <v-card-text>
           <!-- Logo -->
           <v-layout row wrap justify-space-around align-center px-2>
+
+            <!-- Login redirect information box -->
+            <v-flex xs12>
+              <v-alert :value="$route.query.hasOwnProperty('redirect')" type="info">
+                The page at <code>{{ $route.query.redirect }}</code> requires you to be logged in. <br>
+                Please Log into your account before continuing.
+              </v-alert>
+            </v-flex>
+
             <v-flex xs12 pa-0 />
 
             <!-- <v-flex md3 class="hidden-sm-and-down">

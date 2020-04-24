@@ -72,9 +72,22 @@ const router = new Router({
         // },
         // ======= ACCOUNT ROUTES =======
         {
-            path: "/account/:slug?",
+            path: "/account/workouts",
+            name: "workout-list",
+            component: () => import( /* webpackChunkName: "account" */ "./views/account/Account.vue"),
+            meta: {requiresAuth: true}
+        },
+        {
+            path: "/account/workout/new",
+            name: "workout-create",
+            component: () => import( /* webpackChunkName: "account" */ "./views/account/Account.vue"),
+            meta: {requiresAuth: true}
+        },
+        {
+            path: "/account",
             name: "account",
-            component: () => import( /* webpackChunkName: "account" */ "./views/account/Account.vue")
+            component: () => import( /* webpackChunkName: "account" */ "./views/account/Account.vue"),
+            meta: {requiresAuth: true}
         },
         // ======= ADMINISTRATIVE ROUTES =======
         // {

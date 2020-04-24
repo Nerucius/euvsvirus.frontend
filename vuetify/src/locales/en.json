@@ -1,7 +1,18 @@
 {
   "app": {
     "name": "SDWMap",
+    "longname": "Social Distance Workout",
     "company": "Alphanumeric"
+  },
+
+  "pages":{
+    "login":{
+      "title": "Log into your Account",
+      "register": "Create a new Account"
+    },
+    "register":{
+      "title": "Create a new Account"
+    }
   },
 
   "actions": {
