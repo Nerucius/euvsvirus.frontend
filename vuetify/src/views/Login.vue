@@ -1,5 +1,5 @@
 <template>
-  <v-layout justify-center row>
+  <v-layout justify-center align-center>
     <v-flex xs12 md10 lg8 xl6>
       <v-card flat>
         <!-- <v-toolbar dense flat dark color="primary">

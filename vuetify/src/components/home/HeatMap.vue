@@ -1,10 +1,7 @@
 <style scoped>
 .heatmap {
-  height: Calc(100vh - 48px - 36px);
   margin-top: -80px;
-  /* width: 100%;
-  position: absolute;
-  top: 0px; */
+  /* height: Calc(100vh - 48px - 36px); */
 }
 
 .v-toolbar {
@@ -35,7 +32,7 @@
       :to="{name:'workout-create'}"
       color="success"
       absolute
-      style="bottom:40px;right:40px; z-index:999"
+      style="bottom:60px;right:40px; z-index:999"
       dark
       fab
       class="elevation-2"
@@ -74,13 +71,16 @@ export default {
   },
 
   mounted() {
-    console.log('HeatMap.mounted')
     this.initMap()
   },
 
   methods: {
 
     initMap() {
+      let hmDiv = document.getElementById('heatmap');
+      let vContainer = document.getElementById('v-container');
+      hmDiv.style.height = vContainer.clientHeight+"px";
+
       this.map = L.map('heatmap', {
         maxBounds: [
           [80, -180],

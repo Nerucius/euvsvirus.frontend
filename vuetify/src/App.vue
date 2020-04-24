@@ -1,6 +1,8 @@
 <style>
 /* Global Styles */
 
+/* html{ overflow-y: hidden !important; } */
+
 ::-webkit-scrollbar {
   width: 0.65em;
 }
@@ -73,7 +75,7 @@
 
       <!-- Content -->
       <v-content>
-        <v-container pa-0 fluid>
+        <v-container id="v-container" pa-0 fluid fill-height>
           <!-- Main Content Area -->
           <transition name="fade" mode="out-in">
             <router-view :key="routePathKey" />
@@ -135,11 +137,14 @@ export default {
     return {
       loading: true,
       active: true,
-      showFooter: true,
+      showFooterScroll: true,
     };
   },
 
   computed: {
+    showFooter(){
+      return this.showFooterScroll && !(this.$route.name.indexOf('home') != -1)
+    },
     toasts() {
       return this.$store.getters["toast/all"];
     },
@@ -172,10 +177,10 @@ export default {
 
   methods: {
     handleScroll(){
-      if(this.showFooter)
-        this.showFooter = window.scrollY < 310;
+      if(this.showFooterScroll)
+        this.showFooterScroll = window.scrollY < 310;
       else
-        this.showFooter = window.scrollY < 50;
+        this.showFooterScroll = window.scrollY < 50;
     },
     toggleDrawer() {
       this.$refs.navigationDrawer.toggleDrawer();

@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap align-content-start>
+  <v-layout>
     <v-flex xs12>
       <HeatMap />
     </v-flex>
@@ -31,11 +31,9 @@ export default {
   computed: {},
 
   created() {
-    console.log('Home.created')
   },
 
   mounted() {
-    console.log('Home.mounted')
   },
 
   methods: {
