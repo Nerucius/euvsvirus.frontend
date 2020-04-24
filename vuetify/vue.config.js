@@ -7,7 +7,11 @@ module.exports = {
   devServer: {
     compress: true,
     public: process.env.LOCAL_TESTING_DNS,
-    port: 80
+    // port: 80,
+
+    // HTTPS
+    port: 443,
+    https: true,
   },
 
   chainWebpack: config => {

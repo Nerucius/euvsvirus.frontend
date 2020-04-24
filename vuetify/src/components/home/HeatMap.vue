@@ -21,21 +21,40 @@
         <v-text-field v-model="searchTerm" hide-details prepend-icon="search" single-line />
       </v-form>
 
-      <v-btn :disabled="!canGeolocate" icon @click="geolocate">
+      <v-btn :disabled="!canGeolocate" icon @click="geolocate(true)">
         <v-icon>my_location</v-icon>
       </v-btn>
     </v-toolbar>
 
     <!-- Favicon buttons -->
+
+    <v-speed-dial
+      v-model="speeddial"
+      absolute
+      style="bottom:140px;right:30px; z-index:999"
+      direction="top"
+      transition="slide-y-reverse-transition"
+    >
+      <template v-slot:activator>
+        <v-btn v-model="speeddial" color="white" fab>
+          <v-icon>layers</v-icon>
+          <v-icon>close</v-icon>
+        </v-btn>
+      </template>
+
+      <v-btn fab dark small color="white">
+        <v-icon>mdi-map-legend</v-icon>
+      </v-btn>
+    </v-speed-dial>
+
     <v-btn
       v-if="isLoggedIn"
       :to="{name:'workout-create'}"
-      color="success"
+      color="white"
       absolute
-      style="bottom:60px;right:40px; z-index:999"
-      dark
+      style="bottom:60px;right:30px; z-index:999"
       fab
-      class="elevation-2"
+      class="elevation-2 success--text"
     >
       <v-icon>add</v-icon>
     </v-btn>
@@ -50,13 +69,17 @@ import { OpenStreetMapProvider } from "leaflet-geosearch";
 import { Stamen_Watercolor, Stamen_TonerLabels } from "@/plugins/maplayers.js";
 
 const provider = new OpenStreetMapProvider();
+noise.seed(Math.random());
 
 export default {
   data() {
     return {
+      speeddial: false,
       map: null,
+      heatmap: null,
+      positionMarker: null,
       searchMarker: null,
-      searchTerm: "",
+      searchTerm: ""
     };
   },
 
@@ -64,59 +87,100 @@ export default {
     canGeolocate() {
       return window.navigator.geolocation != null;
     },
-    isLoggedIn(){
+    isLoggedIn() {
       return true;
-    },
-
+    }
   },
 
   mounted() {
-    this.initMap()
+    this.initMap();
+    this.initHeatmap();
   },
 
   methods: {
-
     initMap() {
-      let hmDiv = document.getElementById('heatmap');
-      let vContainer = document.getElementById('v-container');
-      hmDiv.style.height = vContainer.clientHeight+"px";
+      let hmDiv = document.getElementById("heatmap");
+      let vContainer = document.getElementById("v-container");
+      hmDiv.style.height = vContainer.clientHeight + "px";
 
-      this.map = L.map('heatmap', {
+      this.map = L.map("heatmap", {
         maxBounds: [
           [80, -180],
           [-70, 180]
         ],
         zoomControl: false,
-        zoom: 13,
+        zoom: 15,
         minZoom: 2,
         maxZoom: 15,
-        center: { lat: 41.3805702, lon: 2.1537778 } // Barcelona
+        center: { lat: 41.37, lon: 2.187 } // Barcelona
       });
 
       Stamen_Watercolor().addTo(this.map);
       Stamen_TonerLabels().addTo(this.map);
 
-      this.map.locate({
-          setView: true,
-          maxZoom: 13,
-          watch: false
-        })
-        .on("locationfound", location => {
-          var marker = L.marker([location.latitude, location.longitude]).bindPopup(
-            "Your location"
-          );
-          var circle = L.circle([location.latitude, location.longitude], location.accuracy / 2, {
-            weight: 1,
-            color: "blue",
-            fillColor: "#cacaca",
-            fillOpacity: 0.2
-          });
-          this.map.addLayer(marker);
-          this.map.addLayer(circle);
-        })
-        .on("locationerror", error => {
-          console.error("location denied");
-        });
+      this.geolocate();
+
+      // listerners
+      this.map.on('moveend', this.initHeatmap)
+      this.map.on('zoomend', this.initHeatmap)
+    },
+
+    initHeatmap() {
+      if (this.map == null) return;
+      if (this.heatmap != null) {
+        this.map.removeLayer(this.heatmap);
+      }
+
+      var heatData = this.getHeatmapData();
+
+      var options = {
+        minOpacity: 0,
+        maxZoom: 15,
+        max: 1,
+        radius: 38,
+        blur: 30,
+        gradient: { 0.65: "rgba(255,255,255,.3)", 0.85: "lime", 1: "rgba(0,0,200,.1)" }
+      };
+
+      this.heatmap = L.heatLayer(heatData, options);
+      // this.heatmap.setOpacity(.5);
+      this.heatmap.addTo(this.map);
+    },
+
+    getHeatmapData(){
+
+
+      let bounds = this.map.getBounds();
+      let o = [bounds.getNorth(), bounds.getWest()];
+      let f = [bounds.getSouth(), bounds.getEast()];
+      let fillrate = 15
+
+      let stepLat = (f[0] - o[0]) / fillrate
+      let stepLon = (f[1] - o[1]) / fillrate
+
+      let data = []
+
+      // generate Data
+      let freq = 100
+      let scale = 2
+
+      for(let lat of Array(fillrate).keys()){
+        lat = Number(lat)
+        for (let lon of Array(fillrate).keys()){
+          lon = Number(lon)
+          // let intensity = 0.25 + (Math.random() * .9)
+          let finalLat = o[0] + (lat * stepLat)
+          let finalLon = o[1] + (lon * stepLon)
+          let intensity = noise.perlin2(finalLat * freq, finalLon * freq);
+          intensity = Math.abs(intensity) * scale
+          let datapoint = [finalLat, finalLon, intensity]
+          data.push(datapoint);
+        }
+      }
+
+
+      return data;
+
     },
 
     async search(event) {
@@ -143,13 +207,24 @@ export default {
       this.map.flyTo([target.y, target.x], 13);
     },
 
-    geolocate() {
+    geolocate(flyTo) {
       if (window.navigator) {
         window.navigator.geolocation.getCurrentPosition(
           location => {
             let lat = location.coords.latitude;
             let lon = location.coords.longitude;
-            this.map.flyTo([lat, lon], 13);
+            if (flyTo) {
+              this.map.flyTo([lat, lon], 13);
+            }
+
+            if (this.positionMarker != null) {
+              L.removeLayer(this.positionMarker);
+            }
+
+            this.positionMarker = L.marker([lat, lon]).bindPopup(
+              "Your location"
+            );
+            this.map.addLayer(this.positionMarker);
           },
           error => {
             console.error("Could not geolocate user");

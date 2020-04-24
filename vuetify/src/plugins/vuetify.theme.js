@@ -4,10 +4,10 @@ export default {
   primary: {
     base: colors.cyan.darken1,
   },
-  success: {
-    base: colors.green.darken2,
-  },
-  warning: {
-    base: colors.orange.darken4,
-  },
+  // success: {
+  //   base: colors.green.darken2,
+  // },
+  // warning: {
+  //   base: colors.orange.darken4,
+  // },
 }

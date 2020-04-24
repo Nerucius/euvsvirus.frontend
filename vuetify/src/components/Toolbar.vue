@@ -18,7 +18,8 @@
     <v-toolbar-title class="headline text-uppercase">
       <router-link :to="{name:'home'}" active-class="router-link">
         <span style="text-transform:none">
-          <small>{{ $t('app.name') }}</small>
+          <small class="hidden-sm-and-up">{{ $t('app.name') }}</small>
+          <small class="hidden-xs-and-down">{{ $t('app.longname') }}</small>
         </span>
       </router-link>
     </v-toolbar-title>
