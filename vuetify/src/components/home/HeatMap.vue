@@ -99,11 +99,11 @@ export default {
       this.map.locate({
           setView: true,
           maxZoom: 13,
-          watch: true
+          watch: false
         })
         .on("locationfound", location => {
           var marker = L.marker([location.latitude, location.longitude]).bindPopup(
-            "Your are here :)"
+            "Your location"
           );
           var circle = L.circle([location.latitude, location.longitude], location.accuracy / 2, {
             weight: 1,
