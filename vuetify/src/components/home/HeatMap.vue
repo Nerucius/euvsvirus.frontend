@@ -94,7 +94,6 @@ export default {
 
   mounted() {
     this.initMap();
-    this.initHeatmap();
   },
 
   methods: {
@@ -115,72 +114,107 @@ export default {
         center: { lat: 41.37, lon: 2.187 } // Barcelona
       });
 
-      Stamen_Watercolor().addTo(this.map);
-      Stamen_TonerLabels().addTo(this.map);
+      let watercolorLayer = Stamen_Watercolor();
+      let labelsLayer = Stamen_TonerLabels();
+      let heatmapLayer = this.initHeatmap();
+      watercolorLayer.addTo(this.map);
+      labelsLayer.addTo(this.map);
+      heatmapLayer.addTo(this.map);
 
       this.geolocate();
 
       // listerners
-      this.map.on('moveend', this.initHeatmap)
-      this.map.on('zoomend', this.initHeatmap)
+      this.map.on("moveend", this.updateHeatmap);
+      this.map.on("zoomend", this.updateHeatmap);
     },
 
     initHeatmap() {
-      if (this.map == null) return;
-      if (this.heatmap != null) {
+      if (this.map != null && this.heatmap != null) {
         this.map.removeLayer(this.heatmap);
       }
 
-      var heatData = this.getHeatmapData();
+      this.heatmap = L.heatLayer([], {});
+      this.updateHeatmap();
+      return this.heatmap;
+    },
+
+    updateHeatmap() {
+      // generate new data and options
+      let newData = this.getHeatmapData(this.map.getBounds());
+      let newOptions = this.getHeatmapOptions(this.map.getZoom());
+
+      this.heatmap.setLatLngs(newData);
+      this.heatmap.setOptions(newOptions);
+    },
+
+    getHeatmapOptions(zoomLevel) {
+      let radius = 38
+      let blur = 30
 
       var options = {
         minOpacity: 0,
-        maxZoom: 15,
+        maxZoom: 1,
         max: 1,
-        radius: 38,
+        radius : 15,
         blur: 30,
-        gradient: { 0.65: "rgba(255,255,255,.3)", 0.85: "lime", 1: "rgba(0,0,200,.1)" }
+        // gradient: {
+        //   0: "rgba(255,255,255,.3)",
+        //   0.4: "rgba(200,255,200,.3)",
+        //   0.8: "rgba(200,200,255,.3)",
+        //   1: "rgba(0,0,200,.1)"
+        // }
       };
 
-      this.heatmap = L.heatLayer(heatData, options);
-      // this.heatmap.setOpacity(.5);
-      this.heatmap.addTo(this.map);
+      return options;
     },
 
-    getHeatmapData(){
-
-
-      let bounds = this.map.getBounds();
+    getHeatmapData(bounds) {
       let o = [bounds.getNorth(), bounds.getWest()];
       let f = [bounds.getSouth(), bounds.getEast()];
-      let fillrate = 15
 
-      let stepLat = (f[0] - o[0]) / fillrate
-      let stepLon = (f[1] - o[1]) / fillrate
+      let latDelta = f[0] - o[0]
+      let lonDelta = f[1] - o[1]
+      o[0] -= latDelta *.3;
+      f[0] += latDelta *.3;
 
-      let data = []
+      o[1] -= lonDelta *.3;
+      f[1] += lonDelta *.3;
 
+      // config
+      let fillrate = 100; // points maximun dimension (vertical or horizontal)
+      let freq = 85;
+      let scale = 1;
+
+      let maxDelta = Math.max(f[0] - o[0], f[1] - o[1]) // get max dimension
+      let coordStep = maxDelta / fillrate; // Coordinate step
       // generate Data
-      let freq = 100
-      let scale = 2
+      let data = [];
+      let currentCoord = [...o]
 
-      for(let lat of Array(fillrate).keys()){
-        lat = Number(lat)
-        for (let lon of Array(fillrate).keys()){
-          lon = Number(lon)
-          // let intensity = 0.25 + (Math.random() * .9)
-          let finalLat = o[0] + (lat * stepLat)
-          let finalLon = o[1] + (lon * stepLon)
-          let intensity = noise.perlin2(finalLat * freq, finalLon * freq);
-          intensity = Math.abs(intensity) * scale
-          let datapoint = [finalLat, finalLon, intensity]
-          data.push(datapoint);
-        }
+      while(currentCoord[0] > f[0]){
+
+          // reset longitude
+          currentCoord[1] = o[1]
+          while(currentCoord[1] < f[1]){
+            let noiseSample = 0
+            noiseSample += 0.2 * noise.perlin2(currentCoord[0] * freq, currentCoord[1] * freq);
+            noiseSample += 0.2 * noise.perlin2((currentCoord[0] + coordStep/2.) * freq, currentCoord[1] * freq);
+            noiseSample += 0.2 * noise.perlin2((currentCoord[0] - coordStep/2.) * freq, currentCoord[1] * freq);
+            noiseSample += 0.2 * noise.perlin2(currentCoord[0] * freq, (currentCoord[1] + coordStep/2.) * freq);
+            noiseSample += 0.2 * noise.perlin2(currentCoord[0] * freq, (currentCoord[1] - coordStep/2.) * freq);
+
+            // let singleSample = noise.perlin2(currentCoord[0] * freq, currentCoord[1] * freq);
+
+            let intensity = Math.max(noiseSample, 0) * scale;
+            let datapoint = [...currentCoord, intensity];
+            data.push(datapoint);
+            // Next longitude
+            currentCoord[1] += coordStep;
+          }
+          // Next latitude
+          currentCoord[0] -= coordStep;
       }
-
-
       return data;
-
     },
 
     async search(event) {
