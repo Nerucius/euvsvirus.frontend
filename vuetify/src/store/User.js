@@ -13,10 +13,14 @@ const userRegisterUrl = API_SERVER + "/api/user/register/";
 // const userResetPasswordRequestUrl = API_SERVER + "/user/resetpassword/";
 // const userResetPasswordSubmitUrl = API_SERVER + "/user/resetpasswordsubmit/";
 
+function md5(str){
+  return CryptoJS.MD5(str).toString();
+}
+
 function createLink(obj){
-  obj.id = obj.userId
   obj.link = {name:"account", params:{slug:obj2slug(obj, 'full_name')}}
   obj.fullName = `${obj.firstName} ${obj.lastName}`
+  obj.imageUrl = `https://www.gravatar.com/avatar/${md5(obj.email)}`
   return obj
 }
 
@@ -44,7 +48,7 @@ export default {
     },
 
     SET_CURRENT(state, item){
-      state.current = item
+      state.current = createLink(item)
     }
   },
 

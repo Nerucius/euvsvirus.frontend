@@ -134,7 +134,7 @@ export default {
       try {
         let response = await this.$store.dispatch("user/register", newUser);
         await this.$store.dispatch("user/login", {
-          mail: newUser.mail,
+          email: newUser.email,
           password: newUser.password
         });
         this.$store.dispatch("toast/success", this.$t("pages.register.registrationSuccess"));
@@ -153,8 +153,9 @@ export default {
     },
 
     isUsernameFree(username) {
-      let allUsers = this.$store.getters["user/all"];
-      return allUsers.filter(u => u.username == username).length == 0;
+      return true;
+      // let allUsers = this.$store.getters["user/all"];
+      // return allUsers.filter(u => u.username == username).length == 0;
     },
 
     isEmail(value = "") {
