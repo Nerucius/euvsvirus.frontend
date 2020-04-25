@@ -15,16 +15,16 @@
 
   <v-menu v-else offset-y>
     <v-btn slot="activator" flat>
-      <v-avatar size="36">
+      <!-- <v-avatar size="36">
         <img
           :src="user.imageUrl"
-          alt="John"
+          :alt="user.firstName"
         >
-      </v-avatar>
-      <!-- {{ user.firstName }}
+      </v-avatar> -->
+      {{ user.firstName }}
       <v-icon right>
         expand_more
-      </v-icon> -->
+      </v-icon>
     </v-btn>
 
     <v-list>

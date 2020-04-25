@@ -21,14 +21,6 @@ td {
                   <v-form ref="form" v-model="valid">
                     <v-text-field
                       v-model="user.firstName"
-                      :label="$t('forms.fields.lastName')"
-                      :hint="$t('forms.hints.lastName')"
-                      :rules="[rules.required]"
-                      prepend-icon="person"
-                      type="text"
-                    />
-                    <v-text-field
-                      v-model="user.lastName"
                       :label="$t('forms.fields.firstName')"
                       :hint="$t('forms.hints.firstName')"
                       :rules="[rules.required]"
@@ -36,7 +28,15 @@ td {
                       type="text"
                     />
                     <v-text-field
-                      v-model="user.mail"
+                      v-model="user.lastName"
+                      :label="$t('forms.fields.lastName')"
+                      :hint="$t('forms.hints.lastName')"
+                      :rules="[rules.required]"
+                      prepend-icon="person"
+                      type="text"
+                    />
+                    <v-text-field
+                      v-model="user.email"
                       :label="$t('forms.fields.email')"
                       :hint="$t('forms.hints.email')"
                       :rules="[rules.required, rules.isEmail]"

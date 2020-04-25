@@ -20,7 +20,7 @@
       <v-form @submit.prevent="search">
         <v-text-field v-model="searchTerm" hide-details prepend-icon="search" single-line />
       </v-form>
-      <v-btn :disabled="!canGeolocate" icon @click="geolocate(true)">
+      <v-btn :disabled="!canGeolocate" icon @click="map.locate({setView:true, maxZoom:13})">
         <v-icon>my_location</v-icon>
       </v-btn>
     </v-toolbar>
@@ -76,12 +76,12 @@ export default {
       speeddial: false,
       searchTerm: "",
 
-      map: null,
+      map: {},
       heatmap: null,
       raster: [],
 
       positionMarker: null,
-      searchMarker: null,
+      searchMarker: null
     };
   },
 
@@ -95,7 +95,7 @@ export default {
   },
 
   mounted() {
-    this.$store.dispatch('workout/load')
+    this.$store.dispatch("workout/load");
     this.initMap();
   },
 
@@ -123,10 +123,25 @@ export default {
       labelsLayer.addTo(this.map);
       heatmapLayer.addTo(this.map);
 
-      this.geolocate();
+      this.map.locate({ setView: true, maxZoom: 13 });
+
+      this.map.on("locationfound", e => {
+        if (this.positionMarker != null) {
+          this.map.removeLayer(this.positionMarker);
+        }
+        this.positionMarker = L.marker(e.latlng)
+          .addTo(this.map)
+          .bindPopup(
+            "You are within " + e.accuracy + " meters from this point"
+          );
+
+        // var radius = Math.min(e.accuracy, 1000);
+        // L.circle(e.latlng, { radius }).addTo(this.map);
+      });
 
       // listerners
       this.map.on("moveend", this.updateHeatmap);
+      this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
       this.map.on("zoomend", this.updateHeatmap);
     },
 
@@ -149,17 +164,17 @@ export default {
       this.heatmap.setOptions(newOptions);
     },
 
-    getHeatmapOptions(zoomLevel, data=null) {
+    getHeatmapOptions(zoomLevel, data = null) {
       let max = 1;
-      if(!!data){
+      if (!!data) {
         // TODO: calculate data max
       }
       var options = {
         // minOpacity: 0,
         // maxZoom: 15,
         max,
-        radius : 15,
-        blur: 30,
+        radius: 15,
+        blur: 30
         // gradient: {
         //   0: "rgba(255,255,255,.3)",
         //   0.4: "rgba(200,255,200,.3)",
@@ -172,36 +187,44 @@ export default {
     },
 
     getHeatmapData(bounds) {
-      let workouts = this.$store.getters['workout/all']
-      let rasterData = []
+      let workouts = this.$store.getters["workout/all"];
+      let rasterData = [];
 
-      for (let workout of workouts){
-        rasterData.push(...workout.raster)
+      for (let workout of workouts) {
+        rasterData.push(...workout.raster);
       }
       return rasterData;
     },
 
-    getIntensityAt(coords){
-      let sum = 0
-      for(let point of this.raster){
-        let distance = Math.sqrt(coords[0] * point[0] + coords[1] * point[1])
-        sum += point[2] / (distance*distance)
+    getIntensityAt(coords) {
+      let sum = 0;
+      for (let point of this.raster) {
+        let distance = Math.sqrt(coords[0] * point[0] + coords[1] * point[1]);
+        sum += point[2] / (distance * distance);
       }
-      return sum
+      return sum;
     },
 
-    getIntensityAtPerlin(coords, kernelRadius=0){
-        let freq = 85;
-        let scale = 1;
+    getIntensityAtPerlin(coords, kernelRadius = 0) {
+      let freq = 85;
+      let scale = 1;
 
-        let noiseSample = 0
-        noiseSample += 0.2 * noise.perlin2(coords[0] * freq, coords[1] * freq);
-        noiseSample += 0.2 * noise.perlin2((coords[0] + kernelRadius) * freq, coords[1] * freq);
-        noiseSample += 0.2 * noise.perlin2((coords[0] - kernelRadius) * freq, coords[1] * freq);
-        noiseSample += 0.2 * noise.perlin2(coords[0] * freq, (coords[1] + kernelRadius) * freq);
-        noiseSample += 0.2 * noise.perlin2(coords[0] * freq, (coords[1] - kernelRadius) * freq);
+      let noiseSample = 0;
+      noiseSample += 0.2 * noise.perlin2(coords[0] * freq, coords[1] * freq);
+      noiseSample +=
+        0.2 *
+        noise.perlin2((coords[0] + kernelRadius) * freq, coords[1] * freq);
+      noiseSample +=
+        0.2 *
+        noise.perlin2((coords[0] - kernelRadius) * freq, coords[1] * freq);
+      noiseSample +=
+        0.2 *
+        noise.perlin2(coords[0] * freq, (coords[1] + kernelRadius) * freq);
+      noiseSample +=
+        0.2 *
+        noise.perlin2(coords[0] * freq, (coords[1] - kernelRadius) * freq);
 
-        return Math.max(noiseSample, 0) * scale;
+      return Math.max(noiseSample, 0) * scale;
     },
 
     async search(event) {
@@ -226,36 +249,6 @@ export default {
         .bindPopup(target.label)
         .openPopup();
       this.map.flyTo([target.y, target.x], 13);
-    },
-
-    geolocate(flyTo) {
-      if (window.navigator) {
-        window.navigator.geolocation.getCurrentPosition(
-          location => {
-            let lat = location.coords.latitude;
-            let lon = location.coords.longitude;
-            if (flyTo) {
-              this.map.flyTo([lat, lon], 13);
-            }
-
-            if (this.positionMarker != null) {
-              L.removeLayer(this.positionMarker);
-            }
-
-            this.positionMarker = L.marker([lat, lon]).bindPopup(
-              "Your location"
-            );
-            this.map.addLayer(this.positionMarker);
-          },
-          error => {
-            console.error("Could not geolocate user");
-            this.$store.dispatch("toast/error", {
-              message:
-                "Could not get your position. Does your device have a GPS device?"
-            });
-          }
-        );
-      }
     }
   }
 };

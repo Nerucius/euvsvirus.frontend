@@ -170,9 +170,8 @@ export default {
 
   async created() {
     // Block on the user status before allowing to show the app
-    this.$store.dispatch("user/load");
     try{
-      await this.$store.dispatch("user/loadCurrent");
+      await this.$store.dispatch("user/load");
     }catch(error){
       // this.$store.dispatch("toast/error", {message: 'Failed to login', error})
     }
@@ -189,11 +188,6 @@ export default {
     }
     window.addEventListener('resize', setMobileVH)
     setMobileVH();
-
-    // setTimeout(() => {
-    //   document.getElementsByClassName('application--wrap')
-    //     .style.height = window.innerHeight
-    // }, 0)
   },
 
   methods: {

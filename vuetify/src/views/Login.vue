@@ -56,7 +56,7 @@
                 @submit.prevent="submitLogin()"
               >
                 <v-text-field
-                  v-model="credentials.mail"
+                  v-model="credentials.email"
                   prepend-icon="person"
                   :label="$t('forms.fields.email')"
                   :rules="rules"
@@ -175,7 +175,7 @@ export default {
       valid: null,
       validResetPassword: null,
       credentials: {
-        mail: "",
+        email: "",
         password: ""
       },
       rules: [v => !!v || this.$t("forms.rules.requiredField")]

@@ -82,6 +82,9 @@ let pow2 = x => Math.pow(x, 2);
 let distance = function(p1, p2) {
   return Math.sqrt(pow2(p1.lat - p2.lat) + pow2(p1.lng - p2.lng));
 };
+let distance2 = function(p1, p2) {
+  return pow2(p1.lat - p2.lat) + pow2(p1.lng - p2.lng);
+};
 
 const provider = new OpenStreetMapProvider();
 
@@ -136,7 +139,7 @@ export default {
       labelsLayer.addTo(this.map);
       heatmapLayer.addTo(this.map);
 
-      this.map.locate({ setView: true, maxZoom: 14 });
+      this.map.locate({ setView: true, maxZoom: 13 });
       this.map.on("locationfound", e => {
         var radius = Math.min(e.accuracy, 1000);
         L.marker(e.latlng)
@@ -163,8 +166,24 @@ export default {
 
     addCoord({ latlng }) {
       if(!this.drawMode) return;
-
       this.raster.push([latlng.lat, latlng.lng, 1]);
+
+      // let radius = 0.0025
+      // let count = 100;
+      // let power = 0.2;
+      // // generate random circle of points
+      // for(let i = 1; i < count; i++){
+      //   let point = {lat:0, lng:0}
+      //   while(distance2(point, latlng) > (radius*radius)){
+      //     point.lat = latlng.lat + (Math.random()-.5) * (radius*2)
+      //     point.lng = latlng.lng + (Math.random()-.5) * (radius*2)
+      //   }
+
+      //   console.log(point)
+      //   this.raster.push([point.lat, point.lng, power]);
+      // }
+
+
       this.updateHeatmap();
     },
 

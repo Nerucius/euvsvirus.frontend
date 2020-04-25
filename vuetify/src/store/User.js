@@ -7,7 +7,9 @@ import {
 import { obj2slug } from "../plugins/utils";
 
 const userLoginUrl = API_SERVER + "/api/user/login";
-// const userRegisterUrl = API_SERVER + "/user/register/";
+const currentUserUrl = API_SERVER + "/api/user/current";
+const userRegisterUrl = API_SERVER + "/api/user/register/";
+
 // const userResetPasswordRequestUrl = API_SERVER + "/user/resetpassword/";
 // const userResetPasswordSubmitUrl = API_SERVER + "/user/resetpasswordsubmit/";
 
@@ -48,6 +50,8 @@ export default {
 
   actions: {
     load: async function (context, payload={}) {
+      context.dispatch('loadCurrent')
+      return;
       if (Array.isArray(payload)){
         // Ids provided, get detailed information on given pids
         let ids = payload
@@ -77,12 +81,17 @@ export default {
     },
 
     loadCurrent: async function (context) {
-      let currentUserId = Cookies.get('user_id')
-      if (currentUserId == null) return;
-
-      let response = await UserResource.get({id:currentUserId})
-      let user = response.data
-      context.commit("SET_CURRENT", user);
+      try{
+        let response = (await Vue.http.get(currentUserUrl)).body
+        console.log(response)
+        context.commit('SET_CURRENT', response)
+      }catch(error){
+        // User not logged in
+        context.commit('SET_CURRENT', null)
+        Cookies.remove('authorization')
+      }
+      // let user = response
+      // context.commit("SET_CURRENT", user);
 
       // for(let user of users){
       //   if(user.userId == currentUserId){
@@ -106,14 +115,9 @@ export default {
     },
 
     login: async function (context, credentials) {
-        let authentication = (await Vue.http.post(userLoginUrl, credentials))
-        let user = authentication.body
-
-        console.log("LOGED IN AS");
-        console.log(user);
-
-        Cookies.set('authorization', user.token, { expires: 365 })
-        Cookies.set('user_id', user.userId, { expires: 365 })
+        let user = (await Vue.http.post(userLoginUrl, credentials)).body
+        let token = user.token
+        Cookies.set('authorization', token, { expires: 365 })
         context.commit("SET_CURRENT", user)
 
         // Not needed since login returns entire user
