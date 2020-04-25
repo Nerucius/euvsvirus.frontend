@@ -18,7 +18,13 @@
     <!-- Searchbar -->
     <v-toolbar floating dense>
       <v-form @submit.prevent="search">
-        <v-text-field :disabled="drawMode" v-model="searchTerm" hide-details prepend-icon="search" single-line />
+        <v-text-field
+          :disabled="drawMode"
+          v-model="searchTerm"
+          hide-details
+          prepend-icon="search"
+          single-line
+        />
       </v-form>
       <v-btn :disabled="drawMode || !canGeolocate" icon @click="geolocate(true)">
         <v-icon>my_location</v-icon>
@@ -26,7 +32,21 @@
     </v-toolbar>
 
     <v-btn
+      v-if="!drawMode"
+      key="upload"
       color="success"
+      absolute
+      style="bottom:150px;right:30px; z-index:999"
+      fab
+      class="elevation-2"
+      @click="toggleDrawMode"
+    >
+      <v-icon>mdi-cloud-upload</v-icon>
+    </v-btn>
+
+    <v-btn
+      :color="drawMode ? 'warning' : 'warning'"
+      key="toggle-draw"
       absolute
       style="bottom:60px;right:30px; z-index:999"
       fab
@@ -57,6 +77,12 @@
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import { Stamen_Watercolor, Stamen_TonerLabels } from "@/plugins/maplayers.js";
 
+let pow2 = x => Math.pow(x, 2);
+
+let distance = function(p1, p2) {
+  return Math.sqrt(pow2(p1.lat - p2.lat) + pow2(p1.lng - p2.lng));
+};
+
 const provider = new OpenStreetMapProvider();
 
 export default {
@@ -65,7 +91,9 @@ export default {
   data() {
     return {
       map: null,
+      mouseDown: false,
       drawMode: false,
+      lastDrawPoint: null,
       searchTerm: "",
       polygons: []
     };
@@ -74,7 +102,7 @@ export default {
   computed: {
     canGeolocate() {
       return window.navigator.geolocation != null;
-    },
+    }
   },
 
   mounted() {
@@ -103,12 +131,38 @@ export default {
       let labelsLayer = Stamen_TonerLabels();
       watercolorLayer.addTo(this.map);
       labelsLayer.addTo(this.map);
+
+      this.map.on("mousedown", () => (this.mouseDown = true));
+      this.map.on("mouseup", () => (this.mouseDown = false));
+      this.map.on("mousemove", this.handleDraw);
     },
 
-    toggleDrawMode(){
-      this.drawMode = !this.drawMode
-      if(this.drawMode) this.map.dragging.disable();
-      else this.map.dragging.enable();
+    handleDraw(e) {
+      if (!this.drawMode || !this.mouseDown) return;
+      let { lat, lng } = e.latlng;
+
+      if (
+        !this.lastDrawPoint ||
+        distance(this.lastDrawPoint, e.latlng) > 0.0025
+      ) {
+        // L.marker([lat, lng]).addTo(this.map);
+        L.circle([lat, lng], {
+          radius: 250,
+          stroke: false,
+          color: "rgba(0,128,255,.5)",
+          fillOpacity: 1,
+        }).addTo(this.map);
+        this.lastDrawPoint = e.latlng;
+      }
+    },
+
+    toggleDrawMode() {
+      this.drawMode = !this.drawMode;
+      if (this.drawMode) {
+        this.map.dragging.disable();
+      } else {
+        this.map.dragging.enable();
+      }
     },
 
     async search(event) {
