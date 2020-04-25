@@ -1,7 +1,7 @@
 <style scoped>
 .map {
   margin-top: -80px;
-  /* height: Calc(100vh - 48px - 36px); */
+  height: Calc(var(--vh, 1vh) * 100 - 48px);
 }
 
 .v-toolbar {
@@ -95,14 +95,14 @@ export default {
   },
 
   mounted() {
+    this.$store.dispatch('workout/load')
     this.initMap();
   },
 
   methods: {
     initMap() {
-      let hmDiv = document.getElementById("heatmap");
-      let vContainer = document.getElementById("v-container");
-      hmDiv.style.height = vContainer.clientHeight + "px";
+      // let hmDiv = document.getElementById("heatmap");
+      // hmDiv.style.height = `100%`
 
       this.map = L.map("heatmap", {
         maxBounds: [
@@ -128,7 +128,6 @@ export default {
       // listerners
       this.map.on("moveend", this.updateHeatmap);
       this.map.on("zoomend", this.updateHeatmap);
-      this.map.on("click", this.addCoord);
     },
 
     initHeatmap() {
@@ -150,14 +149,15 @@ export default {
       this.heatmap.setOptions(newOptions);
     },
 
-    getHeatmapOptions(zoomLevel) {
-      let radius = 38
-      let blur = 30
-
+    getHeatmapOptions(zoomLevel, data=null) {
+      let max = 1;
+      if(!!data){
+        // TODO: calculate data max
+      }
       var options = {
-        minOpacity: 0,
-        maxZoom: 1,
-        max: 1,
+        // minOpacity: 0,
+        // maxZoom: 15,
+        max,
         radius : 15,
         blur: 30,
         // gradient: {
@@ -172,51 +172,16 @@ export default {
     },
 
     getHeatmapData(bounds) {
-      return this.raster;
+      let workouts = this.$store.getters['workout/all']
+      let rasterData = []
 
-      let o = [bounds.getNorth(), bounds.getWest()];
-      let f = [bounds.getSouth(), bounds.getEast()];
-
-      let latDelta = f[0] - o[0]
-      let lonDelta = f[1] - o[1]
-      o[0] -= latDelta *.3;
-      f[0] += latDelta *.3;
-
-      o[1] -= lonDelta *.3;
-      f[1] += lonDelta *.3;
-
-      // config
-      let fillrate = 100; // points maximun dimension (vertical or horizontal)
-      let maxDelta = Math.max(f[0] - o[0], f[1] - o[1]) // get max dimension
-      let coordStep = maxDelta / fillrate; // Coordinate step
-      // generate Data
-      let data = [];
-      let currentCoord = [...o]
-
-      while(currentCoord[0] > f[0]){
-
-          // reset longitude
-          currentCoord[1] = o[1]
-          while(currentCoord[1] < f[1]){
-            let intensity = this.getIntensity(currentCoord, coordStep*2) * 10
-            let datapoint = [...currentCoord, intensity];
-            data.push(datapoint);
-            // Next longitude
-            currentCoord[1] += coordStep;
-          }
-          // Next latitude
-          currentCoord[0] -= coordStep;
+      for (let workout of workouts){
+        rasterData.push(...workout.raster)
       }
-      return data;
+      return rasterData;
     },
 
-    addCoord({latlng}){
-      this.raster.push([latlng.lat, latlng.lng, 1])
-      console.log(this.raster)
-      this.updateHeatmap();
-    },
-
-    getIntensity(coords){
+    getIntensityAt(coords){
       let sum = 0
       for(let point of this.raster){
         let distance = Math.sqrt(coords[0] * point[0] + coords[1] * point[1])
@@ -225,7 +190,7 @@ export default {
       return sum
     },
 
-    getIntensityPerlin(coords, kernelRadius=0){
+    getIntensityAtPerlin(coords, kernelRadius=0){
         let freq = 85;
         let scale = 1;
 

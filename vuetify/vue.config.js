@@ -6,6 +6,7 @@ module.exports = {
   // Allow npm run serve on local testing domain
   devServer: {
     compress: true,
+    host: '0.0.0.0',
     public: process.env.LOCAL_TESTING_DNS,
     // port: 80,
 

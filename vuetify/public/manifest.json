@@ -1,6 +1,6 @@
 {
-  "name": "Platform",
-  "short_name": "Platform",
+  "name": "Social Distance Workout",
+  "short_name": "SDW Map",
   "icons": [{
       "src": "./img/icons/android-chrome-192x192.png",
       "sizes": "192x192",

@@ -1,7 +1,7 @@
 <style scoped>
 .map {
   margin-top: -80px;
-  /* height: Calc(100vh - 48px - 36px); */
+  height: Calc(var(--vh, 1vh) * 100 - 48px);
 }
 
 .v-toolbar {
@@ -39,7 +39,7 @@
       style="bottom:150px;right:30px; z-index:999"
       fab
       class="elevation-2"
-      @click="toggleDrawMode"
+      @click="save"
     >
       <v-icon>mdi-cloud-upload</v-icon>
     </v-btn>
@@ -95,7 +95,10 @@ export default {
       drawMode: false,
       lastDrawPoint: null,
       searchTerm: "",
-      polygons: []
+
+      // Drawing
+      heatmap: null,
+      raster: []
     };
   },
 
@@ -107,14 +110,11 @@ export default {
 
   mounted() {
     this.initMap();
+    this.raster = this.value || []
   },
 
   methods: {
     initMap() {
-      let hmDiv = document.getElementById("map");
-      let vContainer = document.getElementById("v-container");
-      hmDiv.style.height = vContainer.clientHeight + "px";
-
       this.map = L.map("map", {
         maxBounds: [
           [80, -180],
@@ -127,14 +127,60 @@ export default {
         center: { lat: 41.37, lon: 2.187 } // Barcelona
       });
 
+      // Init layers
       let watercolorLayer = Stamen_Watercolor();
       let labelsLayer = Stamen_TonerLabels();
+      let heatmapLayer = this.initHeatmap();
+
       watercolorLayer.addTo(this.map);
       labelsLayer.addTo(this.map);
+      heatmapLayer.addTo(this.map);
 
-      this.map.on("mousedown", () => (this.mouseDown = true));
-      this.map.on("mouseup", () => (this.mouseDown = false));
-      this.map.on("mousemove", this.handleDraw);
+      this.map.locate({ setView: true, maxZoom: 14 });
+      this.map.on("locationfound", e => {
+        var radius = Math.min(e.accuracy, 1000);
+        L.marker(e.latlng)
+          .addTo(this.map)
+          .bindPopup(
+            "You are within " + e.accuracy + " meters from this point"
+          );
+        L.circle(e.latlng, { radius }).addTo(this.map);
+      });
+
+      // this.map.on("mousedown", () => (this.mouseDown = true));
+      // this.map.on("mouseup", () => (this.mouseDown = false));
+      this.map.on("click", this.addCoord);
+    },
+
+    initHeatmap() {
+      if (this.map != null && this.heatmap != null) {
+        this.map.removeLayer(this.heatmap);
+      }
+
+      this.heatmap = L.heatLayer([], {});
+      return this.heatmap;
+    },
+
+    addCoord({ latlng }) {
+      if(!this.drawMode) return;
+
+      this.raster.push([latlng.lat, latlng.lng, 1]);
+      this.updateHeatmap();
+    },
+
+    updateHeatmap() {
+      // generate new data and options
+      let newData = this.raster;
+      let newOptions = {
+        minOpacity: 0,
+        maxZoom: 1,
+        max: 1,
+        radius: 15,
+        blur: 30
+      };
+
+      this.heatmap.setLatLngs(newData);
+      this.heatmap.setOptions(newOptions);
     },
 
     handleDraw(e) {
@@ -150,7 +196,7 @@ export default {
           radius: 250,
           stroke: false,
           color: "rgba(0,128,255,.5)",
-          fillOpacity: 1,
+          fillOpacity: 1
         }).addTo(this.map);
         this.lastDrawPoint = e.latlng;
       }
@@ -160,8 +206,17 @@ export default {
       this.drawMode = !this.drawMode;
       if (this.drawMode) {
         this.map.dragging.disable();
+        let currentZoom = this.map.getZoom();
+        // this.map.setOptions({
+        //   minZoom: currentZoom,
+        //   maxZoom: currentZoom,
+        // })
       } else {
         this.map.dragging.enable();
+        // this.map.setOptions({
+        //   minZoom: 2,
+        //   maxZoom: 15,
+        // })
       }
     },
 
@@ -220,8 +275,8 @@ export default {
     },
 
     save() {
-      this.$emit("input", this.polygons);
-      this.$emit("change", this.polygons);
+      this.$emit("input", this.raster);
+      this.$emit("change", this.raster);
     }
   }
 };

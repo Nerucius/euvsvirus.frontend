@@ -1,7 +1,10 @@
 <style>
 /* Global Styles */
-
 /* html{ overflow-y: hidden !important; } */
+.application--wrap{
+  height: auto !important;
+  min-height: calc(var(--vh, 1vh) * 100) !important;
+}
 
 ::-webkit-scrollbar {
   width: 0.65em;
@@ -75,7 +78,7 @@
 
       <!-- Content -->
       <v-content>
-        <v-container id="v-container" pa-0 fluid fill-height>
+        <v-container id="v-container" pa-0 fill-height fluid>
           <!-- Main Content Area -->
           <transition name="fade" mode="out-in">
             <router-view :key="routePathKey" />
@@ -143,7 +146,7 @@ export default {
 
   computed: {
     showFooter(){
-      return false;
+      return !this.$route.meta.hasMap;
       // return this.showFooterScroll
       //   && !(
       //     !this.$route.name ||
@@ -176,8 +179,21 @@ export default {
     this.loading = false;
   },
 
-  async mounted(){
+  mounted(){
     window.addEventListener('scroll', this.handleScroll);
+    // Fix body height
+
+    let setMobileVH = () => {
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', setMobileVH)
+    setMobileVH();
+
+    // setTimeout(() => {
+    //   document.getElementsByClassName('application--wrap')
+    //     .style.height = window.innerHeight
+    // }, 0)
   },
 
   methods: {

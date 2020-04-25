@@ -38,6 +38,7 @@ const router = new Router({
             path: "/",
             name: "home",
             component: Home,
+            meta: {hasMap: true}
         },
         {
             path: "/about-us",
@@ -81,7 +82,8 @@ const router = new Router({
             path: "/account/workout/new",
             name: "workout-create",
             component: () => import( /* webpackChunkName: "workout-create" */ "./views/account/WorkoutCreate.vue"),
-            // meta: {requiresAuth: true}
+            // meta: {requiresAuth: true},
+            meta: {hasMap: true}
         },
         {
             path: "/account",

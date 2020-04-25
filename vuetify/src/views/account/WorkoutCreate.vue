@@ -46,7 +46,7 @@
         </v-card-text>
       </v-card>
       <v-card v-else>
-        <DrawMap @back="prev" />
+        <DrawMap v-model="workout.raster" @back="prev" @change="submit" />
       </v-card>
     </v-flex>
   </v-layout>
@@ -74,7 +74,8 @@ export default {
       formPage: 0,
       isValid: false,
       workout: {
-        date: moment().format("YYYY-MM-DD")
+        date: moment().format("YYYY-MM-DD"),
+        raster: [],
       },
       sports: ["Cycling", "Running", "Walk in the park", "Out with my children", "Other"],
       rules: {
@@ -107,7 +108,9 @@ export default {
       this.formPage += 1;
     },
     submit() {
-      alert(JSON.stringify(this.workout));
+      this.$store.dispatch('workout/create', this.workout)
+      this.$store.dispatch('toast/success', "Workout created!")
+      this.$router.push({name:"home"})
     }
   }
 };

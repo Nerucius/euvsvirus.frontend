@@ -11,6 +11,7 @@ import toast from "./store/Toast"
 import user from "./store/User";
 
 // CRUD Models
+import workout from "./store/Workout";
 
 // Create Store
 export default new Vuex.Store({
@@ -19,5 +20,6 @@ export default new Vuex.Store({
     preferences,
     toast,
     user,
+    workout,
   }
 });
