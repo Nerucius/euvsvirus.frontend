@@ -22,7 +22,7 @@
         >
       </v-avatar> -->
       {{ user.firstName }}
-      <v-icon right>
+      <v-icon>
         expand_more
       </v-icon>
     </v-btn>

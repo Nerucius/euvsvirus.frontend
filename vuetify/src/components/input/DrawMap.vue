@@ -26,7 +26,11 @@
           single-line
         />
       </v-form>
-      <v-btn :disabled="drawMode || !canGeolocate" icon @click="geolocate(true)">
+      <v-btn
+        :disabled="drawMode || !canGeolocate"
+        icon
+        @click="map.locate({setView:true, maxZoom:14})"
+      >
         <v-icon>my_location</v-icon>
       </v-btn>
     </v-toolbar>
@@ -34,18 +38,19 @@
     <v-btn
       v-if="!drawMode"
       key="upload"
-      color="success"
       absolute
       style="bottom:150px;right:30px; z-index:999"
       fab
-      class="elevation-2"
+      class="elevation-2 green--text"
       @click="save"
     >
       <v-icon>mdi-cloud-upload</v-icon>
     </v-btn>
 
+    <!-- Draw interface -->
+
     <v-btn
-      :color="drawMode ? 'warning' : 'warning'"
+      :color="drawMode ? 'error' : 'success'"
       key="toggle-draw"
       absolute
       style="bottom:60px;right:30px; z-index:999"
@@ -57,6 +62,29 @@
       <v-icon v-else>edit</v-icon>
     </v-btn>
 
+    <template v-if="drawMode">
+      <v-btn
+        fab
+        absolute
+        color="white"
+        style="bottom:60px;right:100px; z-index:999"
+        class="elevation-2 text--red"
+        @click="clearAll"
+      >
+        <v-icon>mdi-eraser</v-icon>
+      </v-btn>
+
+      <v-btn
+        fab
+        absolute
+        style="bottom:60px;right:170px; z-index:999"
+        class="elevation-2"
+        @click="()=>{}"
+      >
+        <v-icon>mdi-pentagon</v-icon>
+      </v-btn>
+    </template>
+
     <v-btn
       v-if="!drawMode"
       color="white"
@@ -64,7 +92,7 @@
       style="bottom:60px;left:30px; z-index:999"
       fab
       class="elevation-2 error--text"
-      @click="$emit('back')"
+      @click="confirmBack"
     >
       <v-icon>backspace</v-icon>
     </v-btn>
@@ -94,14 +122,17 @@ export default {
   data() {
     return {
       map: null,
+      heatmap: null,
+      drawGroup: null,
       mouseDown: false,
       drawMode: false,
-      lastDrawPoint: null,
       searchTerm: "",
 
       // Drawing
-      heatmap: null,
+      positionMarker: null,
+      lastDrawCoords: null,
       raster: []
+
     };
   },
 
@@ -113,7 +144,7 @@ export default {
 
   mounted() {
     this.initMap();
-    this.raster = this.value || []
+    this.raster = this.value || [];
   },
 
   methods: {
@@ -130,29 +161,51 @@ export default {
         center: { lat: 41.37, lon: 2.187 } // Barcelona
       });
 
+      this.drawGroup = new L.FeatureGroup().addTo(this.map)
+      // this.drawGroup.setOpacity(.5)
+
       // Init layers
       let watercolorLayer = Stamen_Watercolor();
       let labelsLayer = Stamen_TonerLabels();
-      let heatmapLayer = this.initHeatmap();
 
       watercolorLayer.addTo(this.map);
       labelsLayer.addTo(this.map);
-      heatmapLayer.addTo(this.map);
+
+      // TODO: remove heatmap setup
+      // let heatmapLayer = this.initHeatmap();
+      // heatmapLayer.addTo(this.map);
+      // this.heatmap = heatmapLayer;
+      // Hide heatmap on zoom
+      // this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
+      // this.map.on("zoomend", this.updateHeatmap);
 
       this.map.locate({ setView: true, maxZoom: 13 });
       this.map.on("locationfound", e => {
-        var radius = Math.min(e.accuracy, 1000);
-        L.marker(e.latlng)
+        if (this.positionMarker != null) {
+          this.map.removeLayer(this.positionMarker);
+        }
+        this.positionMarker = L.marker(e.latlng)
           .addTo(this.map)
           .bindPopup(
             "You are within " + e.accuracy + " meters from this point"
           );
-        L.circle(e.latlng, { radius }).addTo(this.map);
+
+        // var radius = Math.min(e.accuracy, 1000);
+        // L.circle(e.latlng, { radius }).addTo(this.map);
       });
 
-      // this.map.on("mousedown", () => (this.mouseDown = true));
-      // this.map.on("mouseup", () => (this.mouseDown = false));
-      this.map.on("click", this.addCoord);
+
+      // mouse draw
+      this.map.on("mousedown", () => (this.mouseDown = true));
+      this.map.on("mouseup", () => (this.mouseDown = false));
+      this.map.on("mouseout", () => (this.mouseDown = false));
+      this.map.on("mousemove", this.handleDraw);
+
+      // TODO: fixed in leaflet 1.6.0
+      // Touch draw
+      // let mapDom = document.getElementById("map")
+      // mapDom.addEventListener("touchstart", this.handleDrawTouch);
+      // mapDom.addEventListener("touchmove", this.handleDrawTouch);
     },
 
     initHeatmap() {
@@ -164,8 +217,15 @@ export default {
       return this.heatmap;
     },
 
+    clearAll() {
+      if (!confirm("Erase all areas?")) return;
+      this.drawGroup.clearLayers();
+      // this.raster = [];
+      // this.updateHeatmap();
+    },
+
     addCoord({ latlng }) {
-      if(!this.drawMode) return;
+      if (!this.drawMode || !this.mouseDown) return;
       this.raster.push([latlng.lat, latlng.lng, 1]);
 
       // let radius = 0.0025
@@ -182,7 +242,6 @@ export default {
       //   console.log(point)
       //   this.raster.push([point.lat, point.lng, power]);
       // }
-
 
       this.updateHeatmap();
     },
@@ -202,22 +261,57 @@ export default {
       this.heatmap.setOptions(newOptions);
     },
 
+    // handleDrawTouch(e) {
+    //   if (!this.drawMode) return;
+    //   if(this.map.getZoom() < 14 ){
+    //     this.$store.dispatch('toast/info',"Please zoom in more to draw")
+    //     return
+    //   }
+
+    //   // Unproject coordinates
+    //   let touch = e.touches[0];
+    //   let { clientX, clientY } = touch;
+    //   let coords = this.map.containerPointToLatLng(
+    //     new L.Point(clientX, clientY - 45)
+    //   );
+
+    //   if (
+    //     this.lastDrawCoords != null &&
+    //     distance(this.lastDrawCoords, coords) < 0.0025
+    //   )
+    //     return;
+    //   this.lastDrawCoords = coords;
+
+    //   L.circle(coords, {
+    //     radius: 200,
+    //     stroke: false,
+    //     color: "rgba(0,128,255,1)",
+    //     fillOpacity: 1
+    //   }).addTo(this.drawGroup);
+    // },
+
     handleDraw(e) {
       if (!this.drawMode || !this.mouseDown) return;
+      if(this.map.getZoom() < 14 ){
+        // show toast for more zoom
+        if(this.$store.getters['toast/all'].length == 0){
+          this.$store.dispatch('toast/info',"Please zoom in more to draw")
+        }
+        return
+      }
       let { lat, lng } = e.latlng;
 
       if (
-        !this.lastDrawPoint ||
-        distance(this.lastDrawPoint, e.latlng) > 0.0025
+        !this.lastDrawCoords ||
+        distance(this.lastDrawCoords, e.latlng) > 0.0025
       ) {
-        // L.marker([lat, lng]).addTo(this.map);
         L.circle([lat, lng], {
           radius: 250,
           stroke: false,
           color: "rgba(0,128,255,.5)",
           fillOpacity: 1
-        }).addTo(this.map);
-        this.lastDrawPoint = e.latlng;
+        }).addTo(this.drawGroup);
+        this.lastDrawCoords = e.latlng;
       }
     },
 
@@ -260,42 +354,24 @@ export default {
         .addTo(this.map)
         .bindPopup(target.label)
         .openPopup();
-      this.map.flyTo([target.y, target.x], 13);
+      this.map.flyTo([target.y, target.x], 14);
     },
 
-    geolocate(flyTo) {
-      if (window.navigator) {
-        window.navigator.geolocation.getCurrentPosition(
-          location => {
-            let lat = location.coords.latitude;
-            let lon = location.coords.longitude;
-            if (flyTo) {
-              this.map.flyTo([lat, lon], 13);
-            }
-
-            if (this.positionMarker != null) {
-              L.removeLayer(this.positionMarker);
-            }
-
-            this.positionMarker = L.marker([lat, lon]).bindPopup(
-              "Your location"
-            );
-            this.map.addLayer(this.positionMarker);
-          },
-          error => {
-            console.error("Could not geolocate user");
-            this.$store.dispatch("toast/error", {
-              message:
-                "Could not get your position. Does your device have a GPS device?"
-            });
-          }
-        );
+    confirmBack(){
+      if(confirm('Go back? you will lose the marked area')){
+        this.$emit('back');
       }
     },
 
     save() {
-      this.$emit("input", this.raster);
-      this.$emit("change", this.raster);
+      if (!confirm("Upload this workout plan?")) return;
+
+      let layers = this.drawGroup.getLayers()
+      layers = layers.map(l => l.getLatLng())
+      layers = layers.map(l => ([l.lat, l.lng, 1]))
+
+      this.$emit("input", layers);
+      this.$emit("change", layers);
     }
   }
 };

@@ -48,7 +48,10 @@ export default {
     },
 
     SET_CURRENT(state, item){
-      state.current = createLink(item)
+      if(!!item)
+        state.current = createLink(item)
+      else
+        state.current = null
     }
   },
 
@@ -173,10 +176,8 @@ export default {
     },
 
     isLoggedIn: state => {
-      return state.current != null //&& state.current.id > 0;
+      return state.current != null;
     },
 
-    educationLevels: state => state.educationLevels,
-    genders: state => state.genders,
   }
 };
