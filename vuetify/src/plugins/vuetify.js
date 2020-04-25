@@ -8,9 +8,6 @@ import i18n from './i18n';
 import theme from './vuetify.theme'
 
 
-
-// Import i18n to translate Vuetify's text
-
 Vue.use(Vuetify, {
   iconfont: 'mdi',
   theme,

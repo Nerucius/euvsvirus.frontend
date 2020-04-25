@@ -6,12 +6,18 @@
   },
 
   "pages":{
+    "home":{
+      "title": "Social Distance Workout | Map"
+    },
     "login":{
       "title": "Log into your Account",
       "register": "Create a new Account"
     },
     "register":{
       "title": "Create a new Account"
+    },
+    "workoutCreate":{
+      "title": "Register a new Workout"
     }
   },
 
@@ -35,6 +41,7 @@
     "close": "Close",
     "cancel": "Cancel",
     "more": "More",
+    "prev": "Previous",
     "next": "Next",
     "manage": "Manage",
     "clearFilter": "Clear filter",
@@ -71,7 +78,8 @@
       "namedRequiredField": "{name} is a required field",
       "mustBeUser": "Please enter a valid list of Users",
       "mustBeURL": "Please enter a valid URL",
-      "mustBeCountry": "Please enter a valid Country"
+      "mustBeCountry": "Please enter a valid Country",
+      "mustBeAfterStart": "End date must be later than Start Date"
     },
     "errors": {
       "invalidCredentials": "Invalid credentials, please verify your username and password."
@@ -107,7 +115,11 @@
       "password": "Password",
       "passwordRepeat": "Repeat your password",
       "title": "Title",
-      "coverImage": "Cover Image"
+      "coverImage": "Cover Image",
+      "sport": "Sport",
+      "date": "Date",
+      "timeStart": "Start time",
+      "timeEnd": "Finish time"
     },
     "labels": {
       "searchUsers": "Search Users"

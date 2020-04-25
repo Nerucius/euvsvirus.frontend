@@ -143,7 +143,12 @@ export default {
 
   computed: {
     showFooter(){
-      return this.showFooterScroll && !(this.$route.name.indexOf('home') != -1)
+      return false;
+      // return this.showFooterScroll
+      //   && !(
+      //     !this.$route.name ||
+      //     (this.$route.name.indexOf('home') != -1)
+      //   )
     },
     toasts() {
       return this.$store.getters["toast/all"];

@@ -19,7 +19,7 @@
       <router-link :to="{name:'home'}" active-class="router-link">
         <span style="text-transform:none">
           <small class="hidden-sm-and-up">{{ $t('app.name') }}</small>
-          <small class="hidden-xs-and-down">{{ $t('app.longname') }}</small>
+          <small class="hidden-xs-only">{{ $t('app.longname') }}</small>
         </span>
       </router-link>
     </v-toolbar-title>

@@ -1,5 +1,5 @@
 <style scoped>
-.heatmap {
+.map {
   margin-top: -80px;
   /* height: Calc(100vh - 48px - 36px); */
 }
@@ -20,7 +20,6 @@
       <v-form @submit.prevent="search">
         <v-text-field v-model="searchTerm" hide-details prepend-icon="search" single-line />
       </v-form>
-
       <v-btn :disabled="!canGeolocate" icon @click="geolocate(true)">
         <v-icon>my_location</v-icon>
       </v-btn>
@@ -60,7 +59,7 @@
     </v-btn>
 
     <!-- Map -->
-    <div id="heatmap" class="heatmap" />
+    <div id="heatmap" class="map" />
   </v-card>
 </template>
 
@@ -75,11 +74,14 @@ export default {
   data() {
     return {
       speeddial: false,
+      searchTerm: "",
+
       map: null,
       heatmap: null,
+      raster: [],
+
       positionMarker: null,
       searchMarker: null,
-      searchTerm: ""
     };
   },
 
@@ -126,6 +128,7 @@ export default {
       // listerners
       this.map.on("moveend", this.updateHeatmap);
       this.map.on("zoomend", this.updateHeatmap);
+      this.map.on("click", this.addCoord);
     },
 
     initHeatmap() {
@@ -169,6 +172,8 @@ export default {
     },
 
     getHeatmapData(bounds) {
+      return this.raster;
+
       let o = [bounds.getNorth(), bounds.getWest()];
       let f = [bounds.getSouth(), bounds.getEast()];
 
@@ -182,9 +187,6 @@ export default {
 
       // config
       let fillrate = 100; // points maximun dimension (vertical or horizontal)
-      let freq = 85;
-      let scale = 1;
-
       let maxDelta = Math.max(f[0] - o[0], f[1] - o[1]) // get max dimension
       let coordStep = maxDelta / fillrate; // Coordinate step
       // generate Data
@@ -196,16 +198,7 @@ export default {
           // reset longitude
           currentCoord[1] = o[1]
           while(currentCoord[1] < f[1]){
-            let noiseSample = 0
-            noiseSample += 0.2 * noise.perlin2(currentCoord[0] * freq, currentCoord[1] * freq);
-            noiseSample += 0.2 * noise.perlin2((currentCoord[0] + coordStep/2.) * freq, currentCoord[1] * freq);
-            noiseSample += 0.2 * noise.perlin2((currentCoord[0] - coordStep/2.) * freq, currentCoord[1] * freq);
-            noiseSample += 0.2 * noise.perlin2(currentCoord[0] * freq, (currentCoord[1] + coordStep/2.) * freq);
-            noiseSample += 0.2 * noise.perlin2(currentCoord[0] * freq, (currentCoord[1] - coordStep/2.) * freq);
-
-            // let singleSample = noise.perlin2(currentCoord[0] * freq, currentCoord[1] * freq);
-
-            let intensity = Math.max(noiseSample, 0) * scale;
+            let intensity = this.getIntensity(currentCoord, coordStep*2) * 10
             let datapoint = [...currentCoord, intensity];
             data.push(datapoint);
             // Next longitude
@@ -215,6 +208,35 @@ export default {
           currentCoord[0] -= coordStep;
       }
       return data;
+    },
+
+    addCoord({latlng}){
+      this.raster.push([latlng.lat, latlng.lng, 1])
+      console.log(this.raster)
+      this.updateHeatmap();
+    },
+
+    getIntensity(coords){
+      let sum = 0
+      for(let point of this.raster){
+        let distance = Math.sqrt(coords[0] * point[0] + coords[1] * point[1])
+        sum += point[2] / (distance*distance)
+      }
+      return sum
+    },
+
+    getIntensityPerlin(coords, kernelRadius=0){
+        let freq = 85;
+        let scale = 1;
+
+        let noiseSample = 0
+        noiseSample += 0.2 * noise.perlin2(coords[0] * freq, coords[1] * freq);
+        noiseSample += 0.2 * noise.perlin2((coords[0] + kernelRadius) * freq, coords[1] * freq);
+        noiseSample += 0.2 * noise.perlin2((coords[0] - kernelRadius) * freq, coords[1] * freq);
+        noiseSample += 0.2 * noise.perlin2(coords[0] * freq, (coords[1] + kernelRadius) * freq);
+        noiseSample += 0.2 * noise.perlin2(coords[0] * freq, (coords[1] - kernelRadius) * freq);
+
+        return Math.max(noiseSample, 0) * scale;
     },
 
     async search(event) {
