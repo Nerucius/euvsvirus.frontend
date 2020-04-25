@@ -164,7 +164,7 @@ export default {
       this.heatmap.setOptions(newOptions);
     },
 
-    getHeatmapOptions(zoomLevel, data = null) {
+    getHeatmapOptions(zoomLevel, data=null) {
       let max = 1;
       if (!!data) {
         // TODO: calculate data max

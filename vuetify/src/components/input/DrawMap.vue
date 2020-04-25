@@ -42,7 +42,7 @@
       style="bottom:150px;right:30px; z-index:999"
       fab
       class="elevation-2 green--text"
-      @click="save"
+      @click="confirmSave"
     >
       <v-icon>mdi-cloud-upload</v-icon>
     </v-btn>
@@ -132,7 +132,6 @@ export default {
       positionMarker: null,
       lastDrawCoords: null,
       raster: []
-
     };
   },
 
@@ -161,24 +160,26 @@ export default {
         center: { lat: 41.37, lon: 2.187 } // Barcelona
       });
 
-      this.drawGroup = new L.FeatureGroup().addTo(this.map)
+      this.drawGroup = new L.FeatureGroup().addTo(this.map);
       // this.drawGroup.setOpacity(.5)
 
       // Init layers
       let watercolorLayer = Stamen_Watercolor();
       let labelsLayer = Stamen_TonerLabels();
+      let heatmapLayer = this.initHeatmap();
 
       watercolorLayer.addTo(this.map);
       labelsLayer.addTo(this.map);
 
-      // TODO: remove heatmap setup
-      // let heatmapLayer = this.initHeatmap();
-      // heatmapLayer.addTo(this.map);
-      // this.heatmap = heatmapLayer;
+      // Heatmap setup
+      heatmapLayer.addTo(this.map);
+      this.heatmap = heatmapLayer;
       // Hide heatmap on zoom
-      // this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
-      // this.map.on("zoomend", this.updateHeatmap);
+      this.map.on("moveend", this.updateHeatmap);
+      this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
+      this.map.on("zoomend", this.updateHeatmap);
 
+      // Trigger locate and add marker
       this.map.locate({ setView: true, maxZoom: 13 });
       this.map.on("locationfound", e => {
         if (this.positionMarker != null) {
@@ -189,23 +190,13 @@ export default {
           .bindPopup(
             "You are within " + e.accuracy + " meters from this point"
           );
-
-        // var radius = Math.min(e.accuracy, 1000);
-        // L.circle(e.latlng, { radius }).addTo(this.map);
       });
-
 
       // mouse draw
       this.map.on("mousedown", () => (this.mouseDown = true));
       this.map.on("mouseup", () => (this.mouseDown = false));
       this.map.on("mouseout", () => (this.mouseDown = false));
       this.map.on("mousemove", this.handleDraw);
-
-      // TODO: fixed in leaflet 1.6.0
-      // Touch draw
-      // let mapDom = document.getElementById("map")
-      // mapDom.addEventListener("touchstart", this.handleDrawTouch);
-      // mapDom.addEventListener("touchmove", this.handleDrawTouch);
     },
 
     initHeatmap() {
@@ -224,35 +215,26 @@ export default {
       // this.updateHeatmap();
     },
 
-    addCoord({ latlng }) {
-      if (!this.drawMode || !this.mouseDown) return;
-      this.raster.push([latlng.lat, latlng.lng, 1]);
+    getHeatmapData(bounds) {
+      let workouts = this.$store.getters["workout/all"];
+      let rasterData = [];
 
-      // let radius = 0.0025
-      // let count = 100;
-      // let power = 0.2;
-      // // generate random circle of points
-      // for(let i = 1; i < count; i++){
-      //   let point = {lat:0, lng:0}
-      //   while(distance2(point, latlng) > (radius*radius)){
-      //     point.lat = latlng.lat + (Math.random()-.5) * (radius*2)
-      //     point.lng = latlng.lng + (Math.random()-.5) * (radius*2)
-      //   }
-
-      //   console.log(point)
-      //   this.raster.push([point.lat, point.lng, power]);
-      // }
-
-      this.updateHeatmap();
+      for (let workout of workouts) {
+        rasterData.push(...workout.raster);
+      }
+      return rasterData;
     },
 
-    updateHeatmap() {
-      // generate new data and options
-      let newData = this.raster;
+    updateHeatmap(zoomLevel, data=null) {
+      let max = 1;
+      if (!!data) {
+        // TODO: calculate data max
+      }
+      let newData = this.getHeatmapData();
       let newOptions = {
-        minOpacity: 0,
-        maxZoom: 1,
-        max: 1,
+        // minOpacity: 0,
+        // maxZoom: 1,
+        max,
         radius: 15,
         blur: 30
       };
@@ -261,43 +243,14 @@ export default {
       this.heatmap.setOptions(newOptions);
     },
 
-    // handleDrawTouch(e) {
-    //   if (!this.drawMode) return;
-    //   if(this.map.getZoom() < 14 ){
-    //     this.$store.dispatch('toast/info',"Please zoom in more to draw")
-    //     return
-    //   }
-
-    //   // Unproject coordinates
-    //   let touch = e.touches[0];
-    //   let { clientX, clientY } = touch;
-    //   let coords = this.map.containerPointToLatLng(
-    //     new L.Point(clientX, clientY - 45)
-    //   );
-
-    //   if (
-    //     this.lastDrawCoords != null &&
-    //     distance(this.lastDrawCoords, coords) < 0.0025
-    //   )
-    //     return;
-    //   this.lastDrawCoords = coords;
-
-    //   L.circle(coords, {
-    //     radius: 200,
-    //     stroke: false,
-    //     color: "rgba(0,128,255,1)",
-    //     fillOpacity: 1
-    //   }).addTo(this.drawGroup);
-    // },
-
     handleDraw(e) {
       if (!this.drawMode || !this.mouseDown) return;
-      if(this.map.getZoom() < 14 ){
+      if (this.map.getZoom() < 14) {
         // show toast for more zoom
-        if(this.$store.getters['toast/all'].length == 0){
-          this.$store.dispatch('toast/info',"Please zoom in more to draw")
+        if (this.$store.getters["toast/all"].length == 0) {
+          this.$store.dispatch("toast/info", "Please zoom in more to draw");
         }
-        return
+        return;
       }
       let { lat, lng } = e.latlng;
 
@@ -316,6 +269,7 @@ export default {
     },
 
     toggleDrawMode() {
+      // TODO: Fix zoom
       this.drawMode = !this.drawMode;
       if (this.drawMode) {
         this.map.dragging.disable();
@@ -357,18 +311,17 @@ export default {
       this.map.flyTo([target.y, target.x], 14);
     },
 
-    confirmBack(){
-      if(confirm('Go back? you will lose the marked area')){
-        this.$emit('back');
-      }
+    confirmBack() {
+      if (!confirm("Go back? you will lose the marked area")) return;
+      this.$emit("back");
     },
 
-    save() {
+    confirmSave() {
       if (!confirm("Upload this workout plan?")) return;
 
-      let layers = this.drawGroup.getLayers()
-      layers = layers.map(l => l.getLatLng())
-      layers = layers.map(l => ([l.lat, l.lng, 1]))
+      let layers = this.drawGroup.getLayers();
+      layers = layers.map(l => l.getLatLng());
+      layers = layers.map(l => [l.lat, l.lng, 1]);
 
       this.$emit("input", layers);
       this.$emit("change", layers);

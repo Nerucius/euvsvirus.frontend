@@ -56,8 +56,8 @@ export default {
         message = params.message
         error = params.error
         try{
-          let serverError = error.body.detail
-          message += `<br/><small><pre>ERROR: ${serverError}</pre></small>`
+          // let serverError = `${error.body.error}. ${error.body.message}`
+          message += `<br/><small><pre>${error.body.error}: ${error.body.message}</pre></small>`
         }catch(_){}
       }
       context.dispatch("new", {color:"error", message});
