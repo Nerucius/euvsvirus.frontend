@@ -14,7 +14,7 @@ services:
       - "./vuetify/src:/vuetify/src"
       # - "static_files:/vuetify/dist"
 
-volumes:
+volumes: {}
   # static_files: {}
   # db_files: {}
   # upload_files: {}
