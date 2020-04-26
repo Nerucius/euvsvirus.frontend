@@ -3,10 +3,13 @@
   <v-layout>
     <v-flex xs12>
       <v-card flat>
-        <v-card-title class="title">{{ $t('pages.account.title') }}</v-card-title>
+        <v-card-title class="title">{{ $t('pages.myWorkouts.title') }}</v-card-title>
         <v-card-text class="pa-0">
           <v-list two-line subheader>
-            <v-subheader>My profile</v-subheader>
+
+            <v-subheader>
+              You have a total of {{ userWorkoutCount }} workouts registered in the system.
+            </v-subheader>
 
             <v-list-tile avatar>
               <v-list-tile-content>
@@ -15,21 +18,6 @@
               </v-list-tile-content>
             </v-list-tile>
 
-            <v-list-tile avatar>
-              <v-list-tile-content>
-                <v-list-tile-title>{{ user.email }}</v-list-tile-title>
-                <v-list-tile-sub-title>Your email (only visible to you)</v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-subheader>My Workouts</v-subheader>
-
-            <v-list-tile avatar :to="{name:'workout-list'}">
-              <v-list-tile-content>
-                <v-list-tile-title>{{ userWorkoutCount }} Workouts</v-list-tile-title>
-                <v-list-tile-sub-title>Open for more details</v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
           </v-list>
         </v-card-text>
       </v-card>
@@ -45,7 +33,7 @@
 export default {
   metaInfo() {
     return {
-      title: this.$t("pages.account.title")
+      title: this.$t("pages.myWorkouts.title")
     };
   },
 
@@ -65,6 +53,7 @@ export default {
 
   async mounted() {
     await this.$store.dispatch("user/load");
+    await this.$store.dispatch("workout/load", {params:{user:this.user.id}});
   },
 
   methods: {}

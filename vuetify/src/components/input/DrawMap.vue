@@ -103,7 +103,7 @@
 
 <script>
 import { OpenStreetMapProvider } from "leaflet-geosearch";
-import { Stamen_Watercolor, Stamen_TonerLabels } from "@/plugins/maplayers.js";
+import { Thunderforest_OpenCycleMap } from "@/plugins/maplayers.js";
 
 let pow2 = x => Math.pow(x, 2);
 
@@ -146,6 +146,11 @@ export default {
     this.raster = this.value || [];
   },
 
+  destroyed(){
+    this.map.off();
+    this.map.remove();
+  },
+
   methods: {
     initMap() {
       this.map = L.map("map", {
@@ -164,14 +169,17 @@ export default {
       // this.drawGroup.setOpacity(.5)
 
       // Init layers
-      let watercolorLayer = Stamen_Watercolor();
-      let labelsLayer = Stamen_TonerLabels();
-      let heatmapLayer = this.initHeatmap();
-
-      watercolorLayer.addTo(this.map);
-      labelsLayer.addTo(this.map);
+      // switch by theme
+      if(this.$store.getters['preferences/theme'] == 'light'){
+        let mapLayer = Thunderforest_OpenCycleMap();
+        mapLayer.addTo(this.map);
+      }else{
+        let mapLayer = Thunderforest_OpenCycleMap();
+        mapLayer.addTo(this.map);
+      }
 
       // Heatmap setup
+      let heatmapLayer = this.initHeatmap();
       heatmapLayer.addTo(this.map);
       this.heatmap = heatmapLayer;
       // Hide heatmap on zoom

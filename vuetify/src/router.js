@@ -75,7 +75,7 @@ const router = new Router({
         {
             path: "/account/workouts",
             name: "workout-list",
-            component: () => import( /* webpackChunkName: "workout-list" */ "./views/account/Account.vue"),
+            component: () => import( /* webpackChunkName: "workout-list" */ "./views/account/WorkoutList.vue"),
             meta: {requiresAuth: true}
         },
         {

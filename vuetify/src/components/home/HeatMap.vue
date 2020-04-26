@@ -55,7 +55,6 @@
 
     <v-btn
       :to="{name:'workout-create'}"
-      color="white"
       absolute
       style="bottom:110px;right:30px; z-index:999"
       fab
@@ -75,7 +74,7 @@
 import TimeToolbar from "@/components/home/TimeToolbar";
 
 import { OpenStreetMapProvider } from "leaflet-geosearch";
-import { Stamen_Watercolor, Stamen_TonerLabels } from "@/plugins/maplayers.js";
+import { Thunderforest_OpenCycleMap } from "@/plugins/maplayers.js";
 
 const provider = new OpenStreetMapProvider();
 noise.seed(Math.random());
@@ -115,6 +114,11 @@ export default {
     this.initMap();
   },
 
+  destroyed(){
+    this.map.off();
+    this.map.remove();
+  },
+
   methods: {
     initMap() {
       // let hmDiv = document.getElementById("heatmap");
@@ -132,11 +136,17 @@ export default {
         center: { lat: 41.37, lon: 2.187 } // Barcelona
       });
 
-      let watercolorLayer = Stamen_Watercolor();
-      let labelsLayer = Stamen_TonerLabels();
+      // Init layers
+      // switch by theme
+      if(this.$store.getters['preferences/theme'] == 'light'){
+        let mapLayer = Thunderforest_OpenCycleMap();
+        mapLayer.addTo(this.map);
+      }else{
+        let mapLayer = Thunderforest_OpenCycleMap();
+        mapLayer.addTo(this.map);
+      }
+
       let heatmapLayer = this.initHeatmap();
-      watercolorLayer.addTo(this.map);
-      labelsLayer.addTo(this.map);
       heatmapLayer.addTo(this.map);
 
       this.map.locate({ setView: true, maxZoom: 13 });
