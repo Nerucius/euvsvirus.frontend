@@ -317,6 +317,10 @@ export default {
     },
 
     confirmSave() {
+      if(this.drawGroup.getLayers().length == 0){
+        this.$store.dispatch('toast/error', {message:this.$t('pages.workoutCreate.errorNoneSelected')})
+        return;
+      }
       if (!confirm("Upload this workout plan?")) return;
 
       let layers = this.drawGroup.getLayers();

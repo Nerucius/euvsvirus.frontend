@@ -20,7 +20,7 @@
               <v-flex xs12 sm6>
                 <DialogTime
                   v-model="workout.timeStart"
-                  :rules="[rules.required]"
+                  :rules="[rules.required, rules.isAfterNow]"
                   :label="$t('forms.fields.timeStart')"
                   @change="revalidate"
                 />
@@ -75,13 +75,14 @@ export default {
       isValid: false,
       workout: {
         date: moment().format("YYYY-MM-DD"),
-        timeStart: moment().format('HH:mm'),
+        timeStart: moment().add(15,'minutes').format('HH:mm'),
         points: [],
       },
       sports: ["Cycling", "Running", "Walk in the park", "Out with my children", "Other"],
       rules: {
         required: v => !!v || this.$t("forms.rules.requiredField"),
-        isAfterStart: v => this.isAfterStart(v) || this.$t("forms.rules.mustBeAfterStart")
+        isAfterStart: v => this.isAfterStart(v) || this.$t("forms.rules.mustBeAfterStart"),
+        isAfterNow: v => this.isAfterNow(v) || this.$t("forms.rules.mustBeAfterNow"),
       }
     };
   },
@@ -91,13 +92,21 @@ export default {
       this.$refs.form.validate()
     },
 
+    isAfterNow(time){
+      if(!time) return true;
+
+      let [sh, sm] = time.split(':').map(parseFloat)
+      let timeMoment = moment(this.workout.date).hours(sh).minutes(sm)
+      return timeMoment.isAfter(moment());
+    },
+
     isAfterStart(time){
-      if(!!this.workout.timeStart){
-        let [sh, sm] = this.workout.timeStart.split(':').map(parseFloat)
-        let [eh, em] = time.split(':').map(parseFloat)
-        return (eh*60 + em) > (sh*60 + sm);
-      }
-      return false;
+      // If no start time or no time
+      if(!time || !this.workout.timeStart) return true;
+
+      let [sh, sm] = this.workout.timeStart.split(':').map(parseFloat)
+      let [eh, em] = time.split(':').map(parseFloat)
+      return (eh*60 + em) > (sh*60 + sm);
     },
 
     prev() {

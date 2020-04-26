@@ -23,7 +23,8 @@
       "title": "My Account"
     },
     "workoutCreate":{
-      "title": "Register a new Workout"
+      "title": "Register a new Workout",
+      "errorNoneSelected": "Error: Please select on the map where you plan to workout."
     },
     "myWorkouts":{
       "title": "My Workouts"
@@ -89,7 +90,8 @@
       "mustBeUser": "Please enter a valid list of Users",
       "mustBeURL": "Please enter a valid URL",
       "mustBeCountry": "Please enter a valid Country",
-      "mustBeAfterStart": "End date must be later than Start Date"
+      "mustBeAfterStart": "End time must be later than Start time",
+      "mustBeAfterNow": "Start time must be after right now"
     },
     "errors": {
       "invalidCredentials": "Invalid credentials, please verify your username and password."

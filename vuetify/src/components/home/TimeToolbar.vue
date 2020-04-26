@@ -9,6 +9,12 @@
 }
 </style>
 
+<style  scoped>
+.v-input--slider{
+  margin: 12px 0 -4px 0;
+}
+</style>
+
 <template>
   <v-card class="time-bar">
     <v-layout px-3 align-center>
