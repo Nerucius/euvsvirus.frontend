@@ -21,6 +21,7 @@ Vue.http.interceptors.push(function(request) {
 const PATCH =  {patch: {method: "PATCH"}, update: {method: "PATCH"}}
 
 export const UserResource                 = Vue.resource(API_SERVER + "/api/user{/id}", {}, PATCH);
+export const WorkoutResource              = Vue.resource(API_SERVER + "/api/workout{/id}", {}, PATCH);
 
 // export const ProjectResource              = Vue.resource(API_SERVER + "/v1/projects{/id}/", {}, PATCH);
 // export const ProjectPhaseResource         = Vue.resource(API_SERVER + "/v1/projectphases{/id}/", {}, PATCH);

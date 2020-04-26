@@ -1,47 +1,140 @@
-import store from "../store";
+import Vue from "../plugins/resource";
+import { WorkoutResource } from "../plugins/resource";
+// import { cloneDeep } from "lodash";
+// import { obj2slug } from "@/plugins/utils";
 
-const STORAGE_KEY = "store/workouts";
+const Resource = WorkoutResource
+
+export function createLink(obj){
+  // obj.link = {name:"project-detail", params:{slug:obj2slug(obj)}}
+  // obj.image_url = obj.image_url || "https://app.inspiresproject.com/img/static/project.jpg"
+  return obj
+}
 
 export default {
   namespaced: true,
 
   state: {
-    workouts: [],
+    items: {},
+    itemsDetail: {},
+
+    sports: [
+      {value:"CYCLING",             name: "models.sport.cycling"},
+      {value:"RUNNING",             name: "models.sport.running"},
+      {value:"WALK_THE_DOG",        name: "models.sport.walkTheDog"},
+      {value:"OTHER",               name: "models.sport.other"},
+    ],
+
   },
 
   mutations: {
-    SET(state, workouts) {
-      state.workouts = [...workouts];
+    ADD(state, items){
+      let newItems = {}
+      items.map(createLink).forEach(i => {newItems[i.id] = i})
+      state.items = { ...state.items, ...newItems}
     },
-    ADD(state, workout) {
-      state.workouts = [...state.workouts, workout];
-      localStorage[STORAGE_KEY] = JSON.stringify(state.workouts);
+
+    ADD_DETAIL(state, items) {
+      let newItems = {}
+      items.map(createLink).forEach(i => {newItems[i.id] = i})
+      state.itemsDetail = { ...state.itemsDetail, ...newItems }
     },
-    ADD_ALL(state, workouts) {
-      state.workouts = [...state.workouts, ...workouts];
-      localStorage[STORAGE_KEY] = JSON.stringify(state.workouts);
+
+    CLEAR(state){
+      state.items = []
+      state.itemsDetail = []
     },
+
+    DELETE(state, id){
+      delete state.items[id]
+      delete state.itemsDetail[id]
+    }
   },
 
   actions: {
-    load: function(context) {
-      let storedWorkouts = localStorage[STORAGE_KEY];
-      try{
-        storedWorkouts = JSON.parse(storedWorkouts)
-      }catch(error){
-        storedWorkouts = []
-        console.error("failed to load "+ storedWorkouts)
+    load: async function (context, payload={}) {
+      if (Array.isArray(payload)){
+        // Ids provided, get detailed information on given pids
+        let ids = payload
+        let items = await Promise.all(ids.map(id => Resource.get({id})))
+        items = items.map(i => i.body)
+        context.commit("ADD_DETAIL", items)
+
+      }else{
+        // No ids provided, just get list of all
+        let params = payload.params || {}
+        // Disabled since ordering will be hammered by dictionary
+        // let query = {ordering: "-modified_at", ...params}
+        let query = {...params}
+
+        let response = (await Resource.get(query)).body
+        let items = response.results
+
+        // Iteratively get all pages
+        // let next = response.next
+        // while(next){
+        //   response = (await Vue.http.get(next)).body
+        //   items = [...items, ...response.results]
+        //   next = response.next
+        // }
+
+        context.commit("ADD", items)
       }
-      context.commit('SET', storedWorkouts)
     },
-    create: function(context, item) {
-      context.commit("ADD", item);
+
+    search: async function (context, params) {
+      let query = {ordering: "-modified_at", ...params}
+
+      let response = (await Resource.get(query)).body
+      let items = response.results
+
+      // Iteratively get all pages
+      let next = response.next
+      while(next){
+        response = (await Vue.http.get(next)).body
+        items = [...items, ...response.results]
+        next = response.next
+      }
+
+      return items.map(createLink)
+    },
+
+    clear: function(context, _){
+      context.commit("CLEAR")
+    },
+
+    create: async function (context, object){
+      let newItem = (await Resource.save(object)).body
+      // await context.dispatch("load", [newItem.id])
+      return newItem
+    },
+
+    update: async function (context, object){
+      let updatedItem = (await Resource.update({id:object.id}, object)).body
+      context.commit("ADD_DETAIL", [updatedItem])
+      return updatedItem
+    },
+
+    delete: async function (context, id){
+      let result = (await Resource.delete({id}))
+      context.dispatch("delete", id)
+      return result
     },
   },
 
   getters: {
-    all: (state) => {
-      return state.workouts;
+    all: state => {
+      return Object.values(state.items)
     },
-  },
+
+    get: state =>{
+      return ( id ) => state.items[id] || {}
+    },
+
+    detail: state =>{
+      return ( id ) => state.itemsDetail[id] || {}
+    },
+
+    sports: state => state.sports,
+  }
 };
