@@ -1,3 +1,10 @@
+<style>
+.leaflet-control-attribution{
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>
+
 <style scoped>
 .map {
   margin-top: -80px;
@@ -27,10 +34,10 @@
 
     <!-- Favicon buttons -->
 
-    <v-speed-dial
+    <!-- <v-speed-dial
       v-model="speeddial"
       absolute
-      style="bottom:140px;right:30px; z-index:999"
+      style="bottom:180px;right:30px; z-index:999"
       direction="top"
       transition="slide-y-reverse-transition"
     >
@@ -44,19 +51,20 @@
       <v-btn fab dark small color="white">
         <v-icon>mdi-map-legend</v-icon>
       </v-btn>
-    </v-speed-dial>
+    </v-speed-dial> -->
 
     <v-btn
-      v-if="isLoggedIn"
       :to="{name:'workout-create'}"
       color="white"
       absolute
-      style="bottom:60px;right:30px; z-index:999"
+      style="bottom:110px;right:30px; z-index:999"
       fab
       class="elevation-2 success--text"
     >
       <v-icon>add</v-icon>
     </v-btn>
+
+    <TimeToolbar v-model="selectedDatetime" @change="updateHeatmap" />
 
     <!-- Map -->
     <div id="heatmap" class="map" />
@@ -64,6 +72,8 @@
 </template>
 
 <script>
+import TimeToolbar from "@/components/home/TimeToolbar";
+
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import { Stamen_Watercolor, Stamen_TonerLabels } from "@/plugins/maplayers.js";
 
@@ -71,10 +81,16 @@ const provider = new OpenStreetMapProvider();
 noise.seed(Math.random());
 
 export default {
+
+  components:{
+    TimeToolbar,
+  },
+
   data() {
     return {
       speeddial: false,
       searchTerm: "",
+      selectedDatetime: moment(),
 
       map: {},
       heatmap: null,
@@ -124,7 +140,6 @@ export default {
       heatmapLayer.addTo(this.map);
 
       this.map.locate({ setView: true, maxZoom: 13 });
-
       this.map.on("locationfound", e => {
         if (this.positionMarker != null) {
           this.map.removeLayer(this.positionMarker);
@@ -142,7 +157,8 @@ export default {
       // listerners
       this.map.on("moveend", this.updateHeatmap);
       this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
-      this.map.on("zoomend", this.updateHeatmap);
+      // TODO: moveend is also triggered by zoomend
+      // this.map.on("zoomend", this.updateHeatmap);
     },
 
     initHeatmap() {
@@ -155,16 +171,16 @@ export default {
       return this.heatmap;
     },
 
-    updateHeatmap() {
+    async updateHeatmap() {
       // generate new data and options
-      let newData = this.getHeatmapData(this.map.getBounds());
-      let newOptions = this.getHeatmapOptions(this.map.getZoom());
+      let newData = await this.getHeatmapData();
+      let newOptions = this.getHeatmapOptions(newData);
 
       this.heatmap.setLatLngs(newData);
       this.heatmap.setOptions(newOptions);
     },
 
-    getHeatmapOptions(zoomLevel, data=null) {
+    getHeatmapOptions(data) {
       let max = 1;
       if (!!data) {
         // TODO: calculate data max
@@ -186,14 +202,27 @@ export default {
       return options;
     },
 
-    getHeatmapData(bounds) {
+    async getHeatmapData(bounds) {
+      await this.updateWorkouts()
       let workouts = this.$store.getters["workout/all"];
       let rasterData = [];
 
       for (let workout of workouts) {
         rasterData.push(...workout.raster);
       }
+      console.log(rasterData)
       return rasterData;
+    },
+
+    async updateWorkouts(){
+      let datetime = this.selectedDatetime.utc().format()
+      let mapBounds = this.map.getBounds()
+      let bounds = [
+        [mapBounds.getNorth(), mapBounds.getEast()],
+        [mapBounds.getSouth(), mapBounds.getWest()],
+      ]
+      // console.log({datetime, bounds})
+      await this.$store.dispatch('workout/load', {params:{bounds:JSON.stringify(bounds),datetime}})
     },
 
     getIntensityAt(coords) {
