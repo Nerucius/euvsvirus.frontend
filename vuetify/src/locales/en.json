@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "SDWMap",
-    "longname": "Social Distance Workout",
+    "name": "SD Workouts",
+    "longname": "Social Distance Workouts",
     "company": "Alphanumeric"
   },
 
@@ -16,8 +16,14 @@
     "register":{
       "title": "Create a new Account"
     },
+    "account":{
+      "title": "My Account"
+    },
     "workoutCreate":{
       "title": "Register a new Workout"
+    },
+    "myWorkouts":{
+      "title": "My Workouts"
     }
   },
 
@@ -60,7 +66,8 @@
     "inactive": "Inactive"
   },
   "noums": {
-    "user": "User"
+    "user": "User",
+    "map" :"Map"
   },
 
   "forms": {

@@ -46,8 +46,18 @@
 
       <v-flex shrink>
         <v-list>
+          <!-- Home -->
+          <v-list-tile :to="{name:'home'}" exact>
+            <v-list-tile-action>
+              <v-icon color="green darken-2">map</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t('noums.map') }}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+          <v-divider />
           <!-- My account -->
-          <v-list-tile to="/account" exact>
+          <v-list-tile :to="{name:'account'}" exact>
             <v-list-tile-action>
               <v-icon color="primary darken-2">person</v-icon>
             </v-list-tile-action>
@@ -57,7 +67,7 @@
           </v-list-tile>
           <v-divider />
           <!-- My Shops -->
-          <v-list-tile to="/account/shops">
+          <v-list-tile :to="{name:'workout-list'}" exact>
             <v-list-tile-action>
               <v-icon color="red darken-2">mdi-basketball</v-icon>
             </v-list-tile-action>
@@ -66,8 +76,8 @@
             </v-list-tile-content>
           </v-list-tile>
           <v-divider />
-          <!-- About us -->
-          <v-list-tile to="/favourites">
+          <!-- Favourites -->
+          <!-- <v-list-tile to="/favourites">
             <v-list-tile-action>
               <v-icon color="orange darken-2">star</v-icon>
             </v-list-tile-action>
@@ -75,7 +85,7 @@
               <v-list-tile-title>{{ $t('pages.favourites.title') }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
-          <v-divider />
+          <v-divider /> -->
         </v-list>
       </v-flex>
 

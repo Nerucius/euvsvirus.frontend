@@ -167,12 +167,12 @@ export default {
     },
 
     current: state => {
-      return state.current || {
+      return state.current || createLink({
         id: -1,
         first_name: "Anonymous",
         last_name: "",
         email: ""
-      };
+      });
     },
 
     isLoggedIn: state => {

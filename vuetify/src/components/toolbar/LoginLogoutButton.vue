@@ -28,6 +28,14 @@
     </v-btn>
 
     <v-list>
+      <v-list-tile :to="{name:'account'}" exact>
+        <v-list-tile-title>
+          <v-icon left>
+            person
+          </v-icon>
+          {{ $t('pages.account.title') }}
+        </v-list-tile-title>
+      </v-list-tile>
       <v-list-tile @click="logout()">
         <v-list-tile-title>
           <v-icon left>
