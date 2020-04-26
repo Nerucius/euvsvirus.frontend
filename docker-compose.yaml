@@ -6,6 +6,7 @@ services:
     build: "./vuetify"
     environment:
       - VUE_APP_API_SERVER
+      - VUE_APP_THUNDERFOREST_APIKEY
       - VUE_APP_I18N_LOCALE
       - VUE_APP_I18N_FALLBACK_LOCALE
     volumes:

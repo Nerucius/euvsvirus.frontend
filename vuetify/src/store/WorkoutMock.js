@@ -35,6 +35,7 @@ export default {
       context.commit('SET', storedWorkouts)
     },
     create: function(context, item) {
+      item.raster = item.points
       context.commit("ADD", item);
     },
   },

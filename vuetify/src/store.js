@@ -21,7 +21,7 @@ export default new Vuex.Store({
     preferences,
     toast,
     user,
-    // workout:workoutMock,
-    workout:workout,
+    workout:workoutMock,
+    // workout:workout,
   }
 });
