@@ -90,7 +90,7 @@ export default {
     return {
       speeddial: false,
       searchTerm: "",
-      selectedDatetime: moment(),
+      selectedDatetime: null,
 
       map: {},
       heatmap: null,
@@ -215,7 +215,7 @@ export default {
     },
 
     async updateWorkouts(){
-      let datetime = this.selectedDatetime.utc().format()
+      let datetime = moment(this.selectedDatetime).utc().format()
       let mapBounds = this.map.getBounds()
       let bounds = [
         [mapBounds.getNorth(), mapBounds.getEast()],

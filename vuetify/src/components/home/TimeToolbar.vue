@@ -40,10 +40,12 @@ export default {
 
   data() {
     return {
+      now: moment(),
       selectedTime: moment(),
       timeSlice: null,
       dirty: false,
-      rangeCenter: 0.25
+      rangeCenter: 0.25,
+      updateTimeTask : null
     };
   },
 
@@ -52,10 +54,10 @@ export default {
       return this.range || 6
     },
     rangeStart() {
-      return moment().add(-((this.rangeValue / 2) * 60), "minutes");
+      return moment(this.now).add(-((this.rangeValue / 2) * 60), "minutes");
     },
     rangeEnd() {
-      return moment().add(+((this.rangeValue / 2) * 60), "minutes");
+      return moment(this.now).add(+((this.rangeValue / 2) * 60), "minutes");
     },
     noSteps() {
       return this.rangeValue * 4; // 4 15 minute intervals in an hour
@@ -66,15 +68,29 @@ export default {
   },
 
   mounted() {
-    this.timeSlice = this.noSteps * this.rangeCenter
+    this.init()
+
+    this.updateTimeTask = setInterval(()=>{
+      if (this.dirty) return
+      this.resetTime()
+    }, 5000 * 60) // every 5 mminutes
+  },
+
+  destroyed(){
+    if(this.updateTimeTask)
+      clearInterval(this.updateTimeTask);
   },
 
   methods: {
-    resetTime(){
-      this.selectedTime = moment();
-      this.timeSlice = this.noSteps * this.rangeCenter
+    init(){
       this.dirty = false;
-      // TODO: test if double change
+      this.now = moment()
+      this.selectedTime = moment()
+      this.timeSlice = this.noSteps * this.rangeCenter
+    },
+
+    resetTime(){
+      this.init()
       this.emitChange()
     },
 
@@ -84,7 +100,7 @@ export default {
     },
 
     emitChange() {
-      this.$emit('input', this.selectedTime)
+      this.$emit('input',  this.selectedTime)
       this.$emit('change', this.selectedTime)
     },
 

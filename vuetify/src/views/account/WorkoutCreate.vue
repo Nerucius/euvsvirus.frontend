@@ -101,12 +101,11 @@ export default {
     },
 
     prev() {
-      this.formPage -= 1;
+      this.formPage = 0;
     },
     next() {
-      if (this.$refs.form.validate()) {
-      }
-      this.formPage += 1;
+      if (!this.$refs.form.validate()) return;
+      this.formPage = 1;
     },
 
     async submit() {
