@@ -92,7 +92,7 @@ export default {
     return {
       speeddial: false,
       searchTerm: "",
-      selectedDatetime: null,
+      selectedDatetime: moment(),
 
       map: {},
       heatmap: null,
