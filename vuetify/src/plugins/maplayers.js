@@ -1,4 +1,4 @@
-const Thunderforest_APIKEY = process.env.VUE_APP_THUNDERFOEST_APIKEY
+const Thunderforest_APIKEY = process.env.VUE_APP_THUNDERFOREST_APIKEY
 
 export const OpenStreetMap_Mapnik = function() {
   return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -14,6 +14,14 @@ export const Stadia_AlidadeSmoothDark = function() {
   });
 };
 
+
+export const Thunderforest_Outdoors = function() {
+  return L.tileLayer('https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey='+Thunderforest_APIKEY, {
+    attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    apikey: '<your apikey>',
+    maxZoom: 22
+  });
+};
 
 export const Thunderforest_OpenCycleMap = function() {
   return L.tileLayer('https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey='+Thunderforest_APIKEY, {

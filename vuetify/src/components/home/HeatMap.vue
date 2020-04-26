@@ -74,7 +74,10 @@
 import TimeToolbar from "@/components/home/TimeToolbar";
 
 import { OpenStreetMapProvider } from "leaflet-geosearch";
-import { Thunderforest_OpenCycleMap } from "@/plugins/maplayers.js";
+import { Thunderforest_OpenCycleMap, Thunderforest_Outdoors } from "@/plugins/maplayers.js";
+
+const LightThemeMap = Thunderforest_Outdoors
+const DarkThemeMap = Thunderforest_Outdoors
 
 const provider = new OpenStreetMapProvider();
 noise.seed(Math.random());
@@ -139,10 +142,10 @@ export default {
       // Init layers
       // switch by theme
       if(this.$store.getters['preferences/theme'] == 'light'){
-        let mapLayer = Thunderforest_OpenCycleMap();
+        let mapLayer = LightThemeMap();
         mapLayer.addTo(this.map);
       }else{
-        let mapLayer = Thunderforest_OpenCycleMap();
+        let mapLayer = DarkThemeMap();
         mapLayer.addTo(this.map);
       }
 
