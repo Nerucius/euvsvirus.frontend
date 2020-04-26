@@ -24,10 +24,10 @@
 
             <v-subheader>My Workouts</v-subheader>
 
-            <v-list-tile avatar>
+            <v-list-tile avatar :to="{name:'my-workouts'}">
               <v-list-tile-content>
-                <v-list-tile-title>{{ user.email }}</v-list-tile-title>
-                <v-list-tile-sub-title>Your email (only visible to you)</v-list-tile-sub-title>
+                <v-list-tile-title>{{ userWorkoutCount }} Workouts</v-list-tile-title>
+                <v-list-tile-sub-title>Open for more details</v-list-tile-sub-title>
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
@@ -57,6 +57,9 @@ export default {
     /** Current User being displayed */
     user() {
       return this.$store.getters["user/current"];
+    },
+    userWorkoutCount(){
+      return 3
     }
   },
 

@@ -7,7 +7,10 @@
 
   "pages":{
     "home":{
-      "title": "Social Distance Workout | Map"
+      "title": "Social Distance Workouts"
+    },
+    "about":{
+      "title": "About us"
     },
     "login":{
       "title": "Log into your Account",

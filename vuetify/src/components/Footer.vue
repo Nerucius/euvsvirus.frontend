@@ -6,7 +6,8 @@
           <v-card-text class="py-2 px-3 grey--text">
             <v-layout>
               <v-flex shrink>
-                {{ $t('app.name') }}
+                {{ $t('app.longname') }}
+                | <router-link :to="{name:'about'}">{{ $t('pages.about.title') }}</router-link>
               </v-flex>
               <v-spacer />
               <v-flex shrink>

@@ -3,10 +3,45 @@
     <v-flex xs12 md10 xl8>
       <v-card flat>
         <v-card-text>
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Iusto impedit ex assumenda dignissimos, tempora sint magnam. Odit, quia praesentium dolorum nisi nostrum numquam enim aliquid fuga suscipit. Voluptate dolorum fugit, quasi eaque eligendi voluptatem alias officiis rem possimus sit asperiores mollitia, praesentium repellendus adipisci ipsam at fuga labore illo atque aut perspiciatis saepe laboriosam. Quae non natus voluptate obcaecati, omnis molestias quibusdam odit molestiae accusamus neque maxime cum quas eaque cumque quo sequi ipsum praesentium enim aspernatur eos architecto unde id blanditiis in? Ex corporis totam dolorem nulla accusantium nam iste est illum, at esse eius repellendus illo neque tempore harum quam minima hic facilis amet. Quidem magnam maiores ipsam ipsa sit, consequuntur deleniti, excepturi et commodi cum at soluta nobis vel pariatur earum nesciunt sequi blanditiis aut delectus veniam quis. Dolores quaerat consequatur nam corrupti voluptates rem esse sapiente adipisci eveniet sequi ducimus eos voluptate atque eum, quam hic non earum praesentium vitae, omnis nulla qui ipsam quasi! Numquam nesciunt ullam eveniet mollitia totam saepe delectus eos. Ab animi sapiente veniam provident a dolores itaque voluptas natus neque consectetur adipisci deleniti id illum, nulla quidem! Repudiandae deleniti natus itaque. Velit ex deleniti inventore nesciunt asperiores necessitatibus, tempora non similique!
-          <br>
-          <br>
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quibusdam neque sint, architecto quaerat voluptates ab asperiores sed ipsum, facilis assumenda quasi repellat non amet adipisci sequi est? Eveniet quas porro non minus consequatur corrupti adipisci recusandae nostrum, ex est vitae iure consequuntur. Omnis quo aspernatur illum velit veritatis exercitationem explicabo ullam repudiandae officiis delectus unde ad inventore cum assumenda cumque harum praesentium, nihil reiciendis animi sint fuga? Culpa provident impedit expedita illum in at voluptas, pariatur commodi magni laboriosam nisi, sequi assumenda praesentium vel sapiente nostrum laudantium. Iure harum molestias neque, sapiente laudantium delectus placeat molestiae maiores, temporibus provident aperiam?
+          <v-layout wrap>
+            <v-flex xs12 sm6 pr-4>
+              <h1>About Us</h1>
+              <p>We are Herman Dempere and Christian Solero, two University of Barcelona alumni. We are experts in the field of Cloud computing and Mathematics. We currently live in Barcelona and are suffering, as many other people are, the ongoing CoVID19 pandemic.</p>
+              <v-layout>
+                <v-flex>
+                  <v-card href="https://www.linkedin.com/in/herman-dempere/">
+                    <v-img
+                      height="180"
+                      src="https://media-exp1.licdn.com/dms/image/C5603AQE64SZdPH3QsQ/profile-displayphoto-shrink_200_200/0?e=1593648000&v=beta&t=zrWzC__ya_EcBN8NJkfL9jPKuAN_tPNVsI-A1Ug9dB4"
+                    />
+                    <v-card-text><b>Herman Dempere</b> on Linkedin</v-card-text>
+                  </v-card>
+                </v-flex>
+                <v-flex xs1></v-flex>
+                <v-flex>
+                  <v-card href="https://www.linkedin.com/in/christian-jose-soler/">
+                    <v-img
+                      height="180"
+                      src="https://media-exp1.licdn.com/dms/image/C4D03AQGIuRf1lEv7IA/profile-displayphoto-shrink_200_200/0?e=1593648000&v=beta&t=aeNTKlBFg0vRJk80ML9Mm_hJ15cPaM8OvsAdI8FJ19o"
+                    />
+                    <v-card-text><b>Christian José Soler</b> on Linkedin</v-card-text>
+                  </v-card>
+                </v-flex>
+              </v-layout>
+              <br>
+              <p>During these trying times, we want to contribute our time and expertise in creating new and innovative tools that can help all of us come of this crisis ahead.</p>
+              <h1>About EUvsVirus</h1>
+              <p>The European Commission, led by the European Innovation Council and in close collaboration with the EU member states, will host a pan-European hackathon to connect civil society, innovators, partners and investors across Europe in order to develop innovative solutions for coronavirus-related challenges.</p>
+              <h1>About this project</h1>
+              <h2>Inspiration</h2>
+              <p>We are looking towards a bittersweet future where we might still need to distance ourselves from other people while we are outside. And that includes when we work out. Imagine going out for a jog and having to come into close contact with other people who had the same idea as you, and unfortunately went to the same nice park at the same time as you. If only you could have known!</p>
+              <h2>What it does</h2>
+              <p>This is where Social Distance Workouts comes into play. Be able to take a quick glance of your city and know exactly where people are planning to go cycling, jogging, swimming. And avoid those areas! Want to contribute to the platform and mark an area where you're going to be minding your business? You can do that aswell. Bonus points, people will also avoid you now that they know wherein you plan to workout. Everyone wins.</p>
+            </v-flex>
+            <v-flex xs12 sm6>
+              <v-img width="100%" src="/img/branding/euvsvirus.jpeg" />
+            </v-flex>
+          </v-layout>
         </v-card-text>
       </v-card>
     </v-flex>
@@ -14,12 +49,10 @@
 </template>
 
 <script>
-
 export default {
-
   metaInfo() {
     return {
-      title: this.$t('pages.about.mainTitle')
+      title: this.$t("pages.about.title")
     };
   },
 
