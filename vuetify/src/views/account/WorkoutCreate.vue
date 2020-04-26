@@ -46,7 +46,7 @@
         </v-card-text>
       </v-card>
       <v-card v-else>
-        <DrawMap v-model="workout.raster" @back="prev" @change="submit" />
+        <DrawMap v-model="workout.points" @back="prev" @change="submit" />
       </v-card>
     </v-flex>
   </v-layout>
@@ -75,7 +75,8 @@ export default {
       isValid: false,
       workout: {
         date: moment().format("YYYY-MM-DD"),
-        raster: [],
+        timeStart: moment().format('HH:mm'),
+        points: [],
       },
       sports: ["Cycling", "Running", "Walk in the park", "Out with my children", "Other"],
       rules: {
@@ -107,10 +108,22 @@ export default {
       }
       this.formPage += 1;
     },
-    submit() {
-      this.$store.dispatch('workout/create', this.workout)
-      this.$store.dispatch('toast/success', "Workout created!")
-      this.$router.push({name:"home"})
+
+    async submit() {
+      let [tsh, tsm] = this.workout.timeStart.split(':').map(parseFloat)
+      let [teh, tem] = this.workout.timeEnd.split(':').map(parseFloat)
+
+      this.workout.datetimeStart = moment(this.date).hour(tsh).minute(tsm).utc().format()
+      this.workout.datetimeEnd = moment(this.date).hour(teh).minute(tem).utc().format()
+
+      try{
+        console.log(this.workout)
+        await this.$store.dispatch('workout/create', this.workout)
+        this.$store.dispatch('toast/success', "Workout created!")
+        this.$router.push({name:"home"})
+      }catch(error){
+        this.$store.dispatch('toast/error', {message:"Failed to create workout. Try again later", error})
+      }
     }
   }
 };
