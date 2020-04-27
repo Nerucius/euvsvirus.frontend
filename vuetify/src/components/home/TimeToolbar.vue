@@ -5,11 +5,12 @@
   bottom: 30px;
   left: 16px;
   right: 16px;
+  white-space: nowrap;
   /* width: 60%; */
 }
 </style>
 
-<style  scoped>
+<style scoped>
 .v-input--slider{
   margin: 12px 0 -4px 0;
 }
@@ -22,7 +23,7 @@
         <v-card
           @click="resetTime"
           :flat="!dirty"
-          class="px-2"
+          class="px-2 text-xs-center"
           v-html="selectedTimeFormat" />
       </v-flex>
       <v-flex>

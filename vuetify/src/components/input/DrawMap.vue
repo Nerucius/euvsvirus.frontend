@@ -73,16 +73,6 @@
       >
         <v-icon>mdi-eraser</v-icon>
       </v-btn>
-
-      <v-btn
-        fab
-        absolute
-        style="bottom:60px;right:170px; z-index:999"
-        class="elevation-2"
-        @click="()=>{}"
-      >
-        <v-icon>mdi-pentagon</v-icon>
-      </v-btn>
     </template>
 
     <v-btn
@@ -120,7 +110,7 @@ let distance2 = function(p1, p2) {
 const provider = new OpenStreetMapProvider();
 
 export default {
-  props: ["value"],
+  props: ["value", "datetime"],
 
   data() {
     return {
@@ -184,11 +174,6 @@ export default {
       // Heatmap setup
       let heatmapLayer = this.initHeatmap();
       heatmapLayer.addTo(this.map);
-      this.heatmap = heatmapLayer;
-      // Hide heatmap on zoom
-      this.map.on("moveend", this.updateHeatmap);
-      this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
-      this.map.on("zoomend", this.updateHeatmap);
 
       // Trigger locate and add marker
       this.map.locate({ setView: true, maxZoom: 13 });
@@ -203,6 +188,10 @@ export default {
           );
       });
 
+      // listerners
+      this.map.on("moveend", this.updateHeatmap);
+      this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
+
       // mouse draw
       this.map.on("mousedown", () => (this.mouseDown = true));
       this.map.on("mouseup", () => (this.mouseDown = false));
@@ -216,7 +205,51 @@ export default {
       }
 
       this.heatmap = L.heatLayer([], {});
+      this.updateHeatmap();
       return this.heatmap;
+    },
+
+    async updateHeatmap() {
+      // generate new data and options
+      let newData = await this.getHeatmapData();
+      let newOptions = this.getHeatmapOptions(newData);
+
+      this.heatmap.setLatLngs(newData);
+      this.heatmap.setOptions(newOptions);
+    },
+
+    getHeatmapOptions(data) {
+      let max = 1;
+      if (!!data) { // TODO: calculate data max
+      }
+      var options = {
+        max,
+        radius: 15,
+        blur: 30
+      };
+      return options;
+    },
+
+    async getHeatmapData(bounds) {
+      await this.updateWorkouts()
+      let workouts = this.$store.getters["workout/all"];
+      let rasterData = [];
+
+      for (let workout of workouts) {
+        rasterData.push(...workout.raster);
+      }
+      console.log(rasterData)
+      return rasterData;
+    },
+
+    async updateWorkouts(){
+      let datetime = moment(this.datetime).utc().format()
+      let mapBounds = this.map.getBounds()
+      let bounds = [
+        [mapBounds.getNorth(), mapBounds.getEast()],
+        [mapBounds.getSouth(), mapBounds.getWest()],
+      ]
+      await this.$store.dispatch('workout/load', {params:{bounds:JSON.stringify(bounds),datetime}})
     },
 
     clearAll() {
@@ -224,34 +257,6 @@ export default {
       this.drawGroup.clearLayers();
       // this.raster = [];
       // this.updateHeatmap();
-    },
-
-    getHeatmapData(bounds) {
-      let workouts = this.$store.getters["workout/all"];
-      let rasterData = [];
-
-      for (let workout of workouts) {
-        rasterData.push(...workout.raster);
-      }
-      return rasterData;
-    },
-
-    updateHeatmap(zoomLevel, data=null) {
-      let max = 1;
-      if (!!data) {
-        // TODO: calculate data max
-      }
-      let newData = this.getHeatmapData();
-      let newOptions = {
-        // minOpacity: 0,
-        // maxZoom: 1,
-        max,
-        radius: 15,
-        blur: 30
-      };
-
-      this.heatmap.setLatLngs(newData);
-      this.heatmap.setOptions(newOptions);
     },
 
     handleDraw(e) {

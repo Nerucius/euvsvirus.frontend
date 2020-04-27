@@ -113,7 +113,6 @@ export default {
   },
 
   mounted() {
-    this.$store.dispatch("workout/load");
     this.initMap();
   },
 
@@ -124,16 +123,13 @@ export default {
 
   methods: {
     initMap() {
-      // let hmDiv = document.getElementById("heatmap");
-      // hmDiv.style.height = `100%`
-
       this.map = L.map("heatmap", {
         maxBounds: [
           [80, -180],
           [-70, 180]
         ],
         zoomControl: false,
-        zoom: 15,
+        zoom: 13,
         minZoom: 2,
         maxZoom: 15,
         center: { lat: 41.37, lon: 2.187 } // Barcelona
@@ -149,10 +145,11 @@ export default {
         mapLayer.addTo(this.map);
       }
 
+      // Heatmap setup
       let heatmapLayer = this.initHeatmap();
       heatmapLayer.addTo(this.map);
 
-      this.map.locate({ setView: true, maxZoom: 13 });
+      // this.map.locate({ setView: true, maxZoom: 13 });
       this.map.on("locationfound", e => {
         if (this.positionMarker != null) {
           this.map.removeLayer(this.positionMarker);
@@ -170,8 +167,6 @@ export default {
       // listerners
       this.map.on("moveend", this.updateHeatmap);
       this.map.on("zoomstart", () => this.heatmap.setLatLngs([]));
-      // TODO: moveend is also triggered by zoomend
-      // this.map.on("zoomend", this.updateHeatmap);
     },
 
     initHeatmap() {
@@ -223,7 +218,6 @@ export default {
       for (let workout of workouts) {
         rasterData.push(...workout.raster);
       }
-      console.log(rasterData)
       return rasterData;
     },
 
@@ -234,39 +228,7 @@ export default {
         [mapBounds.getNorth(), mapBounds.getEast()],
         [mapBounds.getSouth(), mapBounds.getWest()],
       ]
-      // console.log({datetime, bounds})
       await this.$store.dispatch('workout/load', {params:{bounds:JSON.stringify(bounds),datetime}})
-    },
-
-    getIntensityAt(coords) {
-      let sum = 0;
-      for (let point of this.raster) {
-        let distance = Math.sqrt(coords[0] * point[0] + coords[1] * point[1]);
-        sum += point[2] / (distance * distance);
-      }
-      return sum;
-    },
-
-    getIntensityAtPerlin(coords, kernelRadius = 0) {
-      let freq = 85;
-      let scale = 1;
-
-      let noiseSample = 0;
-      noiseSample += 0.2 * noise.perlin2(coords[0] * freq, coords[1] * freq);
-      noiseSample +=
-        0.2 *
-        noise.perlin2((coords[0] + kernelRadius) * freq, coords[1] * freq);
-      noiseSample +=
-        0.2 *
-        noise.perlin2((coords[0] - kernelRadius) * freq, coords[1] * freq);
-      noiseSample +=
-        0.2 *
-        noise.perlin2(coords[0] * freq, (coords[1] + kernelRadius) * freq);
-      noiseSample +=
-        0.2 *
-        noise.perlin2(coords[0] * freq, (coords[1] - kernelRadius) * freq);
-
-      return Math.max(noiseSample, 0) * scale;
     },
 
     async search(event) {

@@ -36,7 +36,7 @@
     <v-spacer />
 
     <v-toolbar-items>
-      <v-btn flat :to="{name:'about'}">{{ $t('pages.about.title') }}</v-btn>
+      <v-btn class="hidden-xs-only" flat :to="{name:'about'}">{{ $t('pages.about.title') }}</v-btn>
       <v-divider vertical />
       <LoginLogoutButton />
     </v-toolbar-items>

@@ -19,8 +19,10 @@ export default {
     itemsDetail: {},
 
     sports: [
-      {value:"CYCLING",             name: "models.sport.cycling"},
       {value:"RUNNING",             name: "models.sport.running"},
+      {value:"CYCLING",             name: "models.sport.cycling"},
+      {value:"SKATING",             name: "models.sport.skating"},
+      {value:"PARK_WITH_KIDS",      name: "models.sport.parkWithKids"},
       {value:"WALK_THE_DOG",        name: "models.sport.walkTheDog"},
       {value:"OTHER",               name: "models.sport.other"},
     ],
@@ -28,6 +30,12 @@ export default {
   },
 
   mutations: {
+    SET(state, items){
+      let newItems = {}
+      items.map(createLink).forEach(i => {newItems[i.id] = i})
+      state.items = {...newItems}
+    },
+
     ADD(state, items){
       let newItems = {}
       items.map(createLink).forEach(i => {newItems[i.id] = i})
@@ -78,7 +86,7 @@ export default {
         //   next = response.next
         // }
 
-        context.commit("ADD", items)
+        context.commit("SET", items)
       }
     },
 

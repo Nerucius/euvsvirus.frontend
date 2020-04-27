@@ -74,6 +74,17 @@
     "map" :"Map"
   },
 
+  "models":{
+    "sport":{
+      "running": "Running",
+      "cycling": "Cycling",
+      "skating": "Skating",
+      "parkWithKids": "Going to the park with Kids",
+      "walkTheDog": "Walking the Dog",
+      "other": "Other"
+    }
+  },
+
   "forms": {
     "titles": {
       "login": "Log In"

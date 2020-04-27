@@ -11,7 +11,9 @@
               v-model="workout.sport"
               :rules="[rules.required]"
               prepend-icon="mdi-basketball"
-              :items="sports"
+              :items="$store.getters['workout/sports']"
+              :item-text="translate"
+              item-value="id"
               :label="$t('forms.fields.sport')"
             />
             <!-- Datetime pickers -->
@@ -35,7 +37,7 @@
             </v-layout>
             <v-layout mt-5>
               <v-flex shrink>
-                <v-btn @click="$router.go(-1)" color="error" outline>{{ $t('actions.cancel') }}</v-btn>
+                <v-btn @click="$router.go(-1)" color="danger" outline>{{ $t('actions.cancel') }}</v-btn>
               </v-flex>
               <v-spacer />
               <v-flex shrink>
@@ -46,7 +48,7 @@
         </v-card-text>
       </v-card>
       <v-card v-else>
-        <DrawMap v-model="workout.points" @back="prev" @change="submit" />
+        <DrawMap v-model="workout.points" :datetime="dateStart" @back="prev" @change="submit" />
       </v-card>
     </v-flex>
   </v-layout>
@@ -69,13 +71,14 @@ export default {
       title: this.$t("pages.workoutCreate.title")
     };
   },
+
   data() {
     return {
+      moment,
       formPage: 0,
       isValid: false,
       workout: {
         date: moment().format("YYYY-MM-DD"),
-        timeStart: moment().add(15,'minutes').format('HH:mm'),
         points: [],
       },
       sports: ["Cycling", "Running", "Walk in the park", "Out with my children", "Other"],
@@ -87,7 +90,19 @@ export default {
     };
   },
 
+  computed:{
+    dateStart(){
+      if(!this.workout.timeStart) return
+      let [tsh, tsm] = this.workout.timeStart.split(':').map(parseFloat)
+      return moment(this.date).hour(tsh).minute(tsm).utc()
+    }
+  },
+
   methods: {
+    translate(obj){
+      return this.$t(obj.name)
+    },
+
     revalidate(){
       this.$refs.form.validate()
     },
@@ -121,11 +136,10 @@ export default {
       let [tsh, tsm] = this.workout.timeStart.split(':').map(parseFloat)
       let [teh, tem] = this.workout.timeEnd.split(':').map(parseFloat)
 
-      this.workout.datetimeStart = moment(this.date).hour(tsh).minute(tsm).utc().format()
-      this.workout.datetimeEnd = moment(this.date).hour(teh).minute(tem).utc().format()
+      this.workout.datetimeStart = moment(this.workout.date).hour(tsh).minute(tsm).utc().format()
+      this.workout.datetimeEnd = moment(this.workout.date).hour(teh).minute(tem).utc().format()
 
       try{
-        console.log(this.workout)
         await this.$store.dispatch('workout/create', this.workout)
         this.$store.dispatch('toast/success', "Workout created!")
         this.$router.push({name:"home"})
